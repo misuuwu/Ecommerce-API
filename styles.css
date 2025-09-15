@@ -1,0 +1,43 @@
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .message-box {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Animation CSS for the flying button */
+        .fly-to-cart {
+            position: fixed;
+            z-index: 100;
+            transition: transform 1.2s ease-in-out, opacity 1.2s ease-in-out;
+        }
+        /* Bounce animation for the cart icon */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .bouncing {
+            animation: bounce 0.4s ease-in-out;
+        }
+        .product-card {
+            min-height: 480px; 
+        }
+        /* Carousel specific styles */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .carousel-slide {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .carousel-item {
+            flex-shrink: 0;
+            width: 100%;
+        }

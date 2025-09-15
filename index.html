@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiSoria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+      <link rel="stylesheet" href="styles.css">
+
+
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto p-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-600 hover:text-gray-900 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-grow max-w-xl mx-4 relative">
+                <input type="text" placeholder="Search for products" class="w-full px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition pl-4 pr-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-gray-600 hover:text-gray-900 transition">Sign in</a>
+                <button class="text-gray-600 hover:text-gray-900 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </button>
+                <button id="cart-button" class="relative text-gray-600 hover:text-gray-900 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.102 1.93.75 2.535M17 13l2.293 2.293c.63.63.102 1.93-.75 2.535M10 16h2v2h-2v-2zm-2 0h2v2h-2v-2z" />
+                    </svg>
+                    <span id="cart-count" class="absolute -top-1 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">0</span>
+                </button>
+                <button class="text-gray-600 hover:text-gray-900 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6 mt-8">
+        
+        <!-- Hero Section - Carousel -->
+        <div class="relative bg-orange-500 rounded-xl overflow-hidden p-8 flex items-center justify-between mb-12 carousel-container">
+            <div id="carousel-slide" class="carousel-slide">
+                <!-- Slide 1 -->
+                <div class="flex-grow carousel-item p-4 flex items-center justify-between">
+                    <div class="flex flex-col items-start space-y-4">
+                        <h2 class="text-4xl font-extrabold text-white">Up to 50% off!</h2>
+                        <button class="bg-white text-gray-800 font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition">Shop Now</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-gray-200 rounded-lg w-40 h-24 sm:w-64 sm:h-40"></div>
+                        <div class="bg-gray-200 rounded-lg w-40 h-24 sm:w-64 sm:h-40 hidden sm:block"></div>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="flex-grow carousel-item p-4 flex items-center justify-between">
+                    <div class="flex flex-col items-start space-y-4">
+                        <h2 class="text-4xl font-extrabold text-white">New Arrivals!</h2>
+                        <button class="bg-white text-gray-800 font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition">Discover More</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-gray-200 rounded-lg w-40 h-24 sm:w-64 sm:h-40"></div>
+                        <div class="bg-gray-200 rounded-lg w-40 h-24 sm:w-64 sm:h-40 hidden sm:block"></div>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="flex-grow carousel-item p-4 flex items-center justify-between">
+                    <div class="flex flex-col items-start space-y-4">
+                        <h2 class="text-4xl font-extrabold text-white">Free Shipping!</h2>
+                        <button class="bg-white text-gray-800 font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition">Grab the Deal</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-gray-200 rounded-lg w-40 h-24 sm:w-64 sm:h-40"></div>
+                        <div class="bg-gray-200 rounded-lg w-40 h-24 sm:w-64 sm:h-40 hidden sm:block"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel Controls -->
+            <button id="prev-btn" class="absolute left-4 z-10 p-2 bg-white bg-opacity-50 rounded-full hover:bg-opacity-75 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button id="next-btn" class="absolute right-4 z-10 p-2 bg-white bg-opacity-50 rounded-full hover:bg-opacity-75 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+            
+            <!-- Indicators -->
+            <div id="carousel-indicators" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                <span class="block w-2 h-2 bg-white rounded-full transition-colors duration-300"></span>
+                <span class="block w-2 h-2 bg-gray-400 rounded-full transition-colors duration-300"></span>
+                <span class="block w-2 h-2 bg-gray-400 rounded-full transition-colors duration-300"></span>
+            </div>
+        </div>
+
+        <!-- Product Categories -->
+        <section class="mb-12">
+            <h3 class="text-3xl font-bold mb-6 text-gray-900">Product Categories</h3>
+            <div class="flex flex-wrap justify-start gap-2" id="categories-list">
+                <!-- Categories will be dynamically generated here -->
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <h3 class="text-3xl font-bold text-center mb-12 text-gray-900">Featured Products</h3>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Product cards will be dynamically added here by JavaScript -->
+        </div>
+
+        <!-- Recommended Products -->
+        <section class="mt-12">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-900">Recommended For You!</h3>
+            <div id="recommended-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Recommended product cards will be dynamically added here by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed right-0 top-0 h-full w-full sm:w-80 bg-white shadow-xl transform translate-x-full transition-transform duration-300 z-50 p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h3 class="text-2xl font-bold">Shopping Cart</h3>
+            <button id="close-cart-btn" class="text-gray-500 hover:text-gray-800 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <ul id="cart-items" class="flex-grow overflow-y-auto space-y-4">
+            <!-- Cart items will be dynamically added here -->
+        </ul>
+        <div class="mt-6 border-t pt-4">
+            <div class="flex justify-between items-center text-xl font-bold">
+                <span>Total:</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+            <button id="checkout-btn" class="w-full mt-4 py-3 bg-green-600 text-white text-lg font-bold rounded-lg hover:bg-green-700 transition">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" class="fixed inset-0 flex items-center justify-center p-4 z-[99] hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-end">
+                <button id="close-product-detail-btn" class="text-gray-500 hover:text-gray-800 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex flex-col md:flex-row gap-8 mt-4">
+                <div class="md:w-1/2">
+                    <img id="detail-img" src="" alt="Product Image" class="w-full h-auto rounded-lg shadow-md object-cover">
+                </div>
+                <div class="md:w-1/2 flex flex-col justify-between">
+                    <div>
+                        <h4 id="detail-name" class="text-3xl font-bold text-gray-900"></h4>
+                        <div id="detail-rating" class="flex items-center text-yellow-400 mt-2"></div>
+                        <p id="detail-price" class="text-4xl font-bold text-blue-600 mt-4"></p>
+                        <p id="detail-description" class="text-gray-600 mt-6 leading-relaxed"></p>
+                    </div>
+                    <button id="detail-add-to-cart-btn" class="w-full mt-6 py-3 bg-blue-600 text-white text-lg font-bold rounded-lg hover:bg-blue-700 transition">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backdrop for all modals -->
+    <div id="backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
+    <!-- Custom Message Box for checkout -->
+    <div id="message-box" class="fixed inset-0 flex items-center justify-center p-4 z-[99] hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center message-box">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h4 class="text-2xl font-bold text-gray-900 mb-2">Thank You!</h4>
+            <p class="text-gray-600 mb-6">Your order has been placed successfully.</p>
+            <button id="close-message-btn" class="bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition">Close</button>
+        </div>
+    </div>
+
+     <script src="app.js"></script>
+</body>
+</html>
