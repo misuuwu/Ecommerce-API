@@ -1,396 +1,437 @@
 
+    // Mock Product Data
+    const products = [
+        { id: 1, name: "Wireless Headphones", price: 199.99, description: "Experience crystal clear audio with these noise-cancelling wireless headphones. Features include a comfortable over-ear design and 24-hour battery life. Perfect for music lovers on the go.", image: "https://placehold.co/400x400/FF5733/FFFFFF?text=Headphones", rating: 4.5, category: "Electronics" },
+        { id: 2, name: "Smart Watch", price: 249.50, description: "Stay connected and track your fitness with this sleek smartwatch. It features a heart rate monitor, step counter, and notifications for calls and messages. Compatible with both iOS and Android devices.", image: "https://placehold.co/400x400/33FF57/FFFFFF?text=Watch", rating: 4.2, category: "Electronics" },
+        { id: 3, name: "Espresso Machine", price: 549.00, description: "Brew barista-quality coffee at home with this compact espresso machine. It has a built-in milk frother and a programmable brewing system. Start your day with the perfect cup.", image: "https://placehold.co/400x400/3357FF/FFFFFF?text=Coffee", rating: 4.8, category: "Appliances" },
+        { id: 4, name: "Gaming Mouse", price: 75.00, description: "Gain a competitive edge with this high-precision gaming mouse. It features customizable RGB lighting, programmable buttons, and an ergonomic design for long gaming sessions.", image: "https://placehold.co/400x400/F333FF/FFFFFF?text=Mouse", rating: 4.1, category: "Electronics" },
+        { id: 5, name: "Portable Blender", price: 45.00, description: "Make smoothies and shakes on the go with this portable USB-rechargeable blender. Its compact size makes it perfect for the gym, office, or travel.", image: "https://placehold.co/400x400/FFFF33/000000?text=Blender", rating: 3.9, category: "Appliances" },
+        { id: 6, name: "Hiking Backpack", price: 120.00, description: "A durable and spacious backpack for all your outdoor adventures. It features multiple compartments, padded shoulder straps, and a waterproof exterior.", image: "https://placehold.co/400x400/33FFBD/000000?text=Backpack", rating: 4.6, category: "Outdoor" },
+        { id: 7, name: "Leather Wallet", price: 60.00, description: "A classic bifold wallet made from genuine leather. It has multiple card slots and a dedicated cash compartment, offering style and functionality.", image: "https://placehold.co/400x400/999999/FFFFFF?text=Wallet", rating: 4.3, category: "Accessories" },
+        { id: 8, name: "Noise Cancelling Earbuds", price: 150.00, description: "Compact earbuds with powerful sound and active noise cancellation. Perfect for commuting and focusing on your work.", image: "https://placehold.co/400x400/5533FF/FFFFFF?text=Earbuds", rating: 4.4, category: "Electronics" },
+        { id: 9, name: "Smart Thermostat", price: 180.00, description: "Control your home's temperature from anywhere with this smart thermostat. It learns your schedule to save energy and can be controlled via a mobile app.", image: "https://placehold.co/400x400/FF33A1/FFFFFF?text=Thermostat", rating: 4.7, category: "Smart+Home" },
+        { id: 10, name: "Robot Vacuum Cleaner", price: 300.00, description: "A smart robot vacuum that automatically cleans your floors. It can be scheduled, controlled via an app, and features sensors to avoid obstacles.", image: "https://placehold.co/400x400/33A1FF/FFFFFF?text=Vacuum", rating: 4.5, category: "Smart+Home" },
+        { id: 11, name: "Digital Camera", price: 700.00, description: "Capture stunning photos and videos with this high-resolution digital camera. It's great for both beginners and experienced photographers.", image: "https://placehold.co/400x400/A1FF33/000000?text=Camera", rating: 4.9, category: "Electronics" },
+        { id: 12, name: "Yoga Mat", price: 35.00, description: "A non-slip yoga mat made from eco-friendly materials. It provides excellent grip and cushioning for your practice.", image: "https://placehold.co/400x400/FF9B33/FFFFFF?text=Yoga+Mat", rating: 4.0, category: "Fitness" },
+        { id: 13, name: "Dumbbell Set", price: 90.00, description: "A set of adjustable dumbbells for a full-body workout at home. The weights can be easily changed to suit your needs.", image: "https://placehold.co/400x400/33FF9B/FFFFFF?text=Dumbbells", rating: 4.5, category: "Fitness" },
+        { id: 14, name: "Instant Pot", price: 110.00, description: "A versatile kitchen appliance that combines 7-in-1 functions: pressure cooker, slow cooker, rice cooker, steamer, sauté, yogurt maker, and warmer.", image: "https://placehold.co/400x400/C033FF/FFFFFF?text=Instant+Pot", rating: 4.6, category: "Appliances" }
+    ];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const cartButton = document.getElementById('cart-button');
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const closeCartBtn = document.getElementById('close-cart-btn');
-            const backdrop = document.getElementById('backdrop');
-            const productGrid = document.getElementById('product-grid');
-            const recommendedGrid = document.getElementById('recommended-grid');
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartTotalElement = document.getElementById('cart-total');
-            const cartCountElement = document.getElementById('cart-count');
-            const checkoutBtn = document.getElementById('checkout-btn');
-            const messageBox = document.getElementById('message-box');
-            const closeMessageBtn = document.getElementById('close-message-btn');
-            const productDetailModal = document.getElementById('product-detail-modal');
-            const closeProductDetailBtn = document.getElementById('close-product-detail-btn');
-            const detailName = document.getElementById('detail-name');
-            const detailPrice = document = document.getElementById('detail-price');
-            const detailRating = document.getElementById('detail-rating');
-            const detailDescription = document.getElementById('detail-description');
-            const detailImg = document.getElementById('detail-img');
-            const detailAddToCartBtn = document.getElementById('detail-add-to-cart-btn');
-            const categoriesList = document.getElementById('categories-list');
+    const categories = ["All", "Electronics", "Appliances", "Outdoor", "Accessories", "Smart Home", "Fitness"];
 
-            let cart = [];
+    // Cart State
+    let cart = [];
 
-            const allProducts = [
-                { name: "Stylish Sneakers", price: 89.99, description: "Step out in style and comfort with these modern sneakers. Designed for both performance and everyday wear, they feature breathable materials and a cushioned sole.", rating: 4.5, category: "Fashion" },
-                { name: "Classic Leather Watch", price: 199.50, description: "An elegant timepiece with a genuine leather strap and a scratch-resistant face. Perfect for formal occasions or daily use.", rating: 4.8, category: "Fashion" },
-                { name: "Noise-Cancelling Headphones", price: 120.00, description: "Immerse yourself in pure sound. These headphones offer superior noise cancellation, a comfortable fit, and long-lasting battery life.", rating: 4.2, category: "Electronics" },
-                { name: "Vintage Camera", price: 450.00, description: "Capture life's moments with a touch of nostalgia. This classic camera is fully functional and a great piece for collectors and photographers alike.", rating: 4.9, category: "Electronics" },
-                { name: "Ergonomic Desk Chair", price: 250.00, description: "Enhance your workspace with this comfortable and supportive desk chair. Adjustable features ensure proper posture during long hours.", rating: 4.7, category: "Home" },
-                { name: "Smart Coffee Maker", price: 75.00, description: "Brew the perfect cup every time with this smart coffee maker. Features programmable settings and a sleek, compact design.", rating: 4.6, category: "Home" },
-                { name: "Portable Bluetooth Speaker", price: 55.00, description: "Take your music anywhere with this powerful and portable speaker. Waterproof design and a 12-hour battery life make it perfect for outdoor adventures.", rating: 4.4, category: "Electronics" },
-                { name: "Artisanal Coffee Beans", price: 18.99, description: "A unique blend of ethically sourced beans, hand-roasted to perfection. Notes of caramel and chocolate provide a rich, smooth flavor.", rating: 5.0, category: "Groceries" },
-                { name: "Wireless Keyboard", price: 49.99, description: "A minimalist wireless keyboard with quiet, responsive keys. Perfect for both office work and casual use.", rating: 4.1, category: "Electronics" },
-                { name: "High-Performance Blender", price: 95.00, description: "Effortlessly blend smoothies, soups, and more with this powerful blender. Stainless steel blades and multiple speed settings.", rating: 4.7, category: "Home" },
-                { name: "Gaming Mouse", price: 65.50, description: "Gain a competitive edge with this ergonomic gaming mouse. Features customizable buttons and a high-precision sensor for ultimate control.", rating: 4.8, category: "Electronics" },
-                { name: "Portable Monitor", price: 210.00, description: "Expand your view on the go with this lightweight and ultra-slim portable monitor. Connects easily to laptops and smartphones via USB-C.", rating: 4.3, category: "Electronics" },
-                { name: "Stainless Steel Water Bottle", price: 25.00, description: "Stay hydrated with this durable water bottle. Double-wall insulation keeps drinks hot or cold for hours.", rating: 4.9, category: "Lifestyle" },
-                { name: "Yoga Mat", price: 35.00, description: "Achieve the perfect pose with this non-slip, eco-friendly yoga mat. Provides excellent cushioning and support for all your stretches.", rating: 4.6, category: "Lifestyle" },
-                { name: "LED Desk Lamp", price: 45.00, description: "Illuminate your workspace with this modern LED lamp. Adjustable brightness and color temperature to suit your needs.", rating: 4.5, category: "Home" },
-                { name: "External Hard Drive", price: 80.00, description: "Store your important files and backups with this reliable external hard drive. Large capacity and fast data transfer speeds.", rating: 4.7, category: "Electronics" },
-                { name: "Mechanical Keyboard", price: 120.00, description: "Experience superior typing with a tactile and satisfying click. Features durable mechanical switches and customizable backlighting.", rating: 4.9, category: "Electronics" },
-                { name: "Digital Drawing Tablet", price: 180.00, description: "Unleash your creativity with this high-resolution drawing tablet. Comes with a pressure-sensitive stylus for precision and control.", rating: 4.5, category: "Electronics" },
-                { name: "Leather Messenger Bag", price: 99.00, description: "A stylish and functional messenger bag made from premium leather. Multiple compartments for a laptop, documents, and other essentials.", rating: 4.8, category: "Fashion" },
-                { name: "Electric Toothbrush", price: 70.00, description: "Achieve a professional clean at home. This electric toothbrush uses sonic vibrations to remove plaque and improve gum health.", rating: 4.6, category: "Beauty" },
-                { name: "Espresso Machine", price: 350.00, description: "Become your own barista with this compact espresso machine. Brews rich, flavorful espresso with a single touch.", rating: 4.7, category: "Home" },
-                { name: "Smart Scale", price: 50.00, description: "Track your health and fitness with this smart scale. Syncs with your phone to provide detailed metrics and progress tracking.", rating: 4.2, category: "Electronics" },
-                { name: "Foldable Drone", price: 290.00, description: "Capture stunning aerial footage with this lightweight and foldable drone. Easy to fly and equipped with a high-definition camera.", rating: 4.5, category: "Electronics" },
-                { name: "Handcrafted Mug", price: 15.00, description: "Enjoy your morning coffee in this unique, handcrafted ceramic mug. Each piece is one-of-a-kind and holds a generous serving.", rating: 4.9, category: "Home" },
-                { name: "Air Purifier", price: 130.00, description: "Breathe cleaner air with this powerful air purifier. Removes dust, pollen, and allergens from your home for a healthier environment.", rating: 4.4, category: "Home" },
-                { name: "Portable Power Bank", price: 30.00, description: "Never run out of battery again. This compact power bank provides fast charging and can power multiple devices on a single charge.", rating: 4.8, category: "Electronics" },
-                { name: "Reusable Shopping Bags (Set of 3)", price: 12.00, description: "Reduce your environmental impact with these durable, reusable shopping bags. Folds up neatly for easy storage.", rating: 4.6, category: "Groceries" },
-                { name: "Acoustic Guitar", price: 200.00, description: "Start your musical journey with this beautiful acoustic guitar. Delivers a rich, warm tone and is perfect for beginners and experienced players alike.", rating: 4.9, category: "Lifestyle" },
-                { name: "Microfiber Towels (Set of 6)", price: 22.00, description: "Highly absorbent and quick-drying microfiber towels. Ideal for kitchen, bathroom, or gym use.", rating: 4.5, category: "Home" },
-                { name: "Car Vacuum Cleaner", price: 40.00, description: "Keep your car spotless with this compact and powerful vacuum. Plugs into your car's power outlet for easy, on-the-go cleaning.", rating: 4.3, category: "Automotive" },
-                { name: "Waterproof Phone Case", price: 29.99, description: "Protect your phone from water and dust with this durable case. Perfect for beach trips, hiking, and everyday use.", rating: 4.7, category: "Lifestyle" },
-                { name: "Gourmet Hot Sauce Set", price: 34.00, description: "A fiery collection of small-batch hot sauces. Features unique flavors and varying heat levels.", rating: 4.9, category: "Groceries" },
-                { name: "Hair Dryer with Diffuser", price: 65.00, description: "Style your hair like a pro with this powerful hair dryer. Includes a diffuser attachment for creating natural curls and waves.", rating: 4.4, category: "Beauty" },
-                { name: "Car Air Freshener", price: 8.00, description: "Keep your car smelling fresh with this long-lasting air freshener. Available in a variety of scents.", rating: 4.0, category: "Automotive" },
-                { name: "Travel Backpack", price: 79.00, description: "A versatile backpack for all your adventures. Features multiple compartments, a padded laptop sleeve, and a comfortable design.", rating: 4.8, category: "Fashion" },
-                { name: "Camping Tent", price: 120.00, description: "A durable and lightweight tent for your next outdoor adventure. Easy to set up and provides great protection from the elements.", rating: 4.6, category: "Outdoor" },
-                { name: "Sleeping Bag", price: 85.00, description: "Stay warm on cold nights with this cozy sleeping bag. Packs down small for easy transport.", rating: 4.7, category: "Outdoor" },
-                { name: "Hiking Boots", price: 95.00, description: "Sturdy and comfortable boots designed for long treks. Provides excellent ankle support and grip on various terrains.", rating: 4.8, category: "Outdoor" },
-                { name: "Headlamp", price: 25.00, description: "A powerful and adjustable headlamp, essential for nighttime activities. Features multiple brightness settings and a long-lasting battery.", rating: 4.5, category: "Outdoor" },
-                { name: "BBQ Grill Set", price: 50.00, description: "Everything you need for a perfect cookout. This set includes a spatula, tongs, and fork, all made from stainless steel.", rating: 4.9, category: "Home" },
-                { name: "Gardening Tool Set", price: 30.00, description: "A complete set of essential gardening tools. Perfect for planting, weeding, and maintaining your garden.", rating: 4.3, category: "Home" },
-                { name: "Dog Leash", price: 18.00, description: "A durable and comfortable leash for your furry friend. Features a strong clip and padded handle.", rating: 4.6, category: "Pets" },
-                { name: "Cat Tree", price: 75.00, description: "Give your cat a place to climb, scratch, and relax. Features multiple levels and a scratching post.", rating: 4.7, category: "Pets" },
-                { name: "Art Easel", price: 60.00, description: "A sturdy wooden easel for artists of all ages. Adjustable to different heights and angles.", rating: 4.5, category: "Arts & Crafts" },
-                { name: "Watercolor Paint Set", price: 22.00, description: "A high-quality set of vibrant watercolor paints. Perfect for creating beautiful and expressive art.", rating: 4.8, category: "Arts & Crafts" },
-                { name: "Sewing Machine", price: 150.00, description: "A user-friendly sewing machine for beginners and hobbyists. Great for mending clothes or starting new projects.", rating: 4.4, category: "Arts & Crafts" },
-                { name: "Resistance Bands (Set of 5)", price: 28.00, description: "A versatile set of bands with different resistance levels. Ideal for strength training, physical therapy, and stretching.", rating: 4.7, category: "Fitness" },
-                { name: "Jump Rope", price: 15.00, description: "A simple yet effective tool for cardio. Features comfortable handles and an adjustable length.", rating: 4.6, category: "Fitness" },
-                { name: "Dumbbell Set", price: 120.00, description: "A comprehensive set of weights for a full-body workout. Includes a rack for easy storage.", rating: 4.9, category: "Fitness" },
-                { name: "Protein Powder", price: 40.00, description: "A delicious and effective protein supplement to support muscle growth and recovery. Available in multiple flavors.", rating: 4.5, category: "Supplements" },
-                { name: "Vitamin C Gummies", price: 20.00, description: "Boost your immune system with these tasty and easy-to-take gummies. A great way to get your daily dose of Vitamin C.", rating: 4.7, category: "Supplements" },
-                { name: "Face Moisturizer", price: 35.00, description: "A lightweight and hydrating moisturizer for all skin types. Leaves your skin feeling soft and smooth.", rating: 4.8, category: "Beauty" },
-                { name: "Hair Mask", price: 25.00, description: "Restore and repair damaged hair with this nourishing hair mask. Leaves hair silky, shiny, and healthy.", rating: 4.6, category: "Beauty" },
-                { name: "Lip Balm Set (Set of 4)", price: 10.00, description: "Keep your lips hydrated and soft with this set of assorted lip balms. Each one has a unique, pleasant scent.", rating: 4.5, category: "Beauty" },
-                { name: "Scented Candle", price: 20.00, description: "A beautifully scented candle to create a relaxing atmosphere. Made from natural soy wax and features a long burn time.", rating: 4.9, category: "Home" },
-                { name: "Throw Blanket", price: 30.00, description: "A soft and cozy throw blanket, perfect for curling up on the sofa. Available in a variety of colors.", rating: 4.7, category: "Home" },
-                { name: "Desk Organizer", price: 15.00, description: "Keep your workspace tidy with this functional desk organizer. Features multiple compartments for pens, paper, and other office supplies.", rating: 4.4, category: "Home" },
-                { name: "Instant Camera", price: 80.00, description: "Capture and print memories instantly with this fun and retro camera. Features easy-to-use controls and a compact design.", rating: 4.6, category: "Electronics" },
-                { name: "Phone Tripod", price: 20.00, description: "Take perfect photos and videos with this portable and adjustable phone tripod. Extends for different heights and angles.", rating: 4.5, category: "Electronics" },
-                { name: "Smart Refrigerator", price: 1500.00, description: "A modern refrigerator with smart features like a built-in display, remote monitoring, and voice commands.", rating: 4.9, category: "Appliances" },
-                { name: "Electric Toaster Oven", price: 65.00, description: "A versatile kitchen appliance that can toast, bake, and broil. A perfect addition to any kitchen.", rating: 4.7, category: "Appliances" },
-                { name: "High-Powered Vacuum Cleaner", price: 200.00, description: "A powerful vacuum cleaner with strong suction and a lightweight design. Cleans carpets and hard floors with ease.", rating: 4.8, category: "Appliances" }
-            ];
+    // Utility Functions
+    const getProductById = (id) => products.find(p => p.id === id);
 
-            const categories = [...new Set(allProducts.map(product => product.category))];
-            
-            // Carousel Logic
-            const carouselSlide = document.getElementById('carousel-slide');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const indicatorsContainer = document.getElementById('carousel-indicators');
-            const slides = document.querySelectorAll('.carousel-item');
-            let currentSlide = 0;
-            
-            function updateIndicators() {
-                const indicators = indicatorsContainer.querySelectorAll('span');
-                indicators.forEach((indicator, index) => {
-                    if (index === currentSlide) {
-                        indicator.classList.remove('bg-gray-400');
-                        indicator.classList.add('bg-white');
-                    } else {
-                        indicator.classList.remove('bg-white');
-                        indicator.classList.add('bg-gray-400');
-                    }
-                });
-            }
+    const getStarRating = (rating) => {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        let stars = '';
+        for (let i = 0; i < fullStars; i++) {
+            stars += '<i class="fas fa-star"></i>';
+        }
+        if (hasHalfStar) {
+            stars += '<i class="fas fa-star-half-alt"></i>';
+        }
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+        for (let i = 0; i < emptyStars; i++) {
+            stars += '<i class="far fa-star"></i>';
+        }
+        return stars;
+    };
 
-            function updateCarousel() {
-                carouselSlide.style.transform = `translateX(${-currentSlide * 100}%)`;
-                updateIndicators();
-            }
+    const showMessage = (text) => {
+        const messageBox = document.getElementById('message-box');
+        messageBox.textContent = text;
+        messageBox.classList.remove('hidden');
+        setTimeout(() => {
+            messageBox.classList.add('opacity-100');
+            messageBox.classList.remove('opacity-0');
+        }, 10);
+        setTimeout(() => {
+            messageBox.classList.remove('opacity-100');
+            messageBox.classList.add('opacity-0');
+            setTimeout(() => messageBox.classList.add('hidden'), 300);
+        }, 2000);
+    };
 
-            nextBtn.addEventListener('click', () => {
-                currentSlide = (currentSlide + 1) % slides.length;
-                updateCarousel();
-            });
-
-            prevBtn.addEventListener('click', () => {
-                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-                updateCarousel();
-            });
-
-            indicatorsContainer.addEventListener('click', (e) => {
-                if (e.target.tagName === 'SPAN') {
-                    const indicatorIndex = Array.from(indicatorsContainer.children).indexOf(e.target);
-                    currentSlide = indicatorIndex;
-                    updateCarousel();
-                }
-            });
-
-            function renderCategories() {
-                categoriesList.innerHTML = '';
-                categories.forEach(category => {
-                    const categoryElement = document.createElement('div');
-                    categoryElement.className = 'flex flex-col items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-lg transition cursor-pointer category-btn';
-                    categoryElement.setAttribute('data-category', category);
-                    categoryElement.innerHTML = `
-                        <div class="bg-gray-200 rounded-lg w-16 h-16 mb-2"></div>
-                        <span class="text-sm font-medium">${category}</span>
-                    `;
-                    categoriesList.appendChild(categoryElement);
-                });
-            }
-
-            // Fisher-Yates shuffle algorithm to randomize products
-            function shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-            }
-
-            // Function to render products, with an optional filter by category
-            function renderProducts(products, container) {
-                shuffleArray(products);
-                container.innerHTML = '';
-                products.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer product-card relative';
-                    
-                    const randomImgUrl = `https://picsum.photos/600/400?random=${Math.random()}`;
-                    product.img = randomImgUrl;
-
-                    productCard.setAttribute('data-name', product.name);
-                    
-                    productCard.innerHTML = `
-                        <span class="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-full z-10">Flash Sale</span>
-                        <img src="${randomImgUrl}" alt="${product.name}" class="w-full h-64 object-cover">
-                        <div class="p-6 text-center">
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">${product.name}</h3>
-                            <p class="text-2xl font-bold text-orange-500 mb-4">₱${product.price.toFixed(2)}</p>
-                            <button class="add-to-cart-btn bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition"
-                                data-name="${product.name}" data-price="${product.price}">Add to Cart</button>
+    // Rendering Functions
+    const renderProducts = (productsToRender, containerId) => {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear previous content
+        productsToRender.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.classList.add('bg-white', 'rounded-2xl', 'shadow-md', 'p-4', 'hover:shadow-xl', 'transition-shadow', 'duration-300', 'cursor-pointer', 'flex', 'flex-col', 'items-center', 'text-center');
+            productCard.dataset.productId = product.id;
+            productCard.innerHTML = `
+                <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-xl mb-4">
+                <div class="flex-grow flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-1">${product.name}</h3>
+                        <p class="text-sm text-gray-500 mb-2">${product.category}</p>
+                        <p class="text-lg font-bold text-orange-600 mb-2">$${product.price.toFixed(2)}</p>
+                        <div class="flex items-center justify-center text-yellow-400 mb-2">
+                            ${getStarRating(product.rating)}
                         </div>
-                    `;
-                    container.appendChild(productCard);
-                });
-            }
-
-            function getStarRatingHtml(rating) {
-                const fullStars = Math.floor(rating);
-                const halfStar = rating % 1 >= 0.5;
-                const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-                let starsHtml = '';
-
-                for (let i = 0; i < fullStars; i++) {
-                    starsHtml += `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.961a1 1 0 00.95.691h4.167c.969 0 1.371 1.24.588 1.81l-3.374 2.454a1 1 0 00-.364 1.118l1.287 3.96a1 1 0 01-1.545 1.118L10 14.62l-3.374 2.454a1 1 0 01-1.546-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.245 9.389c-.783-.57-.38-1.81.588-1.81h4.167a1 1 0 00.95-.691l1.286-3.96z"></path></svg>`;
-                }
-                if (halfStar) {
-                    starsHtml += `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><defs><linearGradient id="half"><stop offset="50%" stop-color="currentColor" /><stop offset="50%" stop-color="#cbd5e1" /></linearGradient></defs><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.961a1 1 0 00.95.691h4.167c.969 0 1.371 1.24.588 1.81l-3.374 2.454a1 1 0 00-.364 1.118l1.287 3.96a1 1 0 01-1.545 1.118L10 14.62l-3.374 2.454a1 1 0 01-1.546-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.245 9.389c-.783-.57-.38-1.81.588-1.81h4.167a1 1 0 00.95-.691l1.286-3.96z" fill="url(#half)"></path></svg>`;
-                }
-                for (let i = 0; i < emptyStars; i++) {
-                    starsHtml += `<svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.961a1 1 0 00.95.691h4.167c.969 0 1.371 1.24.588 1.81l-3.374 2.454a1 1 0 00-.364 1.118l1.287 3.96a1 1 0 01-1.545 1.118L10 14.62l-3.374 2.454a1 1 0 01-1.546-1.118l1.287-3.96a1 1 0 00-.364-1.118L2.245 9.389c-.783-.57-.38-1.81.588-1.81h4.167a1 1 0 00.95-.691l1.286-3.96z"></path></svg>`;
-                }
-                return `<div class="flex items-center space-x-1">${starsHtml}</div><span class="text-gray-600 ml-2">(${rating})</span>`;
-            }
-
-            function updateCartDisplay() {
-                cartItemsContainer.innerHTML = '';
-                let total = 0;
-                let itemCount = 0;
-
-                if (cart.length === 0) {
-                    cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center mt-8">Your cart is empty.</p>';
-                } else {
-                    cart.forEach(item => {
-                        const subtotal = item.price * item.quantity;
-                        total += subtotal;
-                        itemCount += item.quantity;
-
-                        const itemElement = document.createElement('li');
-                        itemElement.className = 'flex items-center justify-between p-2 rounded-lg bg-gray-50';
-                        itemElement.setAttribute('data-name', item.name);
-                        itemElement.innerHTML = `
-                            <div class="flex-1">
-                                <h5 class="font-semibold text-gray-900">${item.name}</h5>
-                                <span class="text-gray-500 text-sm">$${item.price.toFixed(2)} x ${item.quantity}</span>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="font-bold text-gray-800">$${subtotal.toFixed(2)}</span>
-                                <button class="remove-item-btn text-gray-400 hover:text-red-500 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        `;
-                        cartItemsContainer.appendChild(itemElement);
-                    });
-                }
-                
-                cartTotalElement.textContent = `$${total.toFixed(2)}`;
-                cartCountElement.textContent = itemCount;
-
-                document.querySelectorAll('.remove-item-btn').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const itemElement = e.target.closest('li');
-                        const itemName = itemElement.getAttribute('data-name');
-                        const itemIndex = cart.findIndex(item => item.name === itemName);
-
-                        if (itemIndex > -1) {
-                            cart.splice(itemIndex, 1);
-                            updateCartDisplay();
-                        }
-                    });
-                });
-            }
-
-            cartButton.addEventListener('click', () => {
-                cartSidebar.classList.remove('translate-x-full');
-                backdrop.classList.remove('hidden');
-            });
-
-            closeCartBtn.addEventListener('click', () => {
-                cartSidebar.classList.add('translate-x-full');
-                backdrop.classList.add('hidden');
-            });
-
-            backdrop.addEventListener('click', (e) => {
-                if (e.target === backdrop) {
-                    cartSidebar.classList.add('translate-x-full');
-                    productDetailModal.classList.add('hidden');
-                    messageBox.classList.add('hidden');
-                    backdrop.classList.add('hidden');
-                }
-            });
-
-            document.addEventListener('click', (e) => {
-                const button = e.target.closest('.add-to-cart-btn');
-                if (button) {
-                    const productName = button.getAttribute('data-name');
-                    const productPrice = parseFloat(button.getAttribute('data-price'));
-                    
-                    animateToCart(button);
-                    addToCart(productName, productPrice);
-                    return;
-                }
-
-                const productCard = e.target.closest('[data-name]');
-                if (productCard) {
-                    const productName = productCard.getAttribute('data-name');
-                    const product = allProducts.find(p => p.name === productName);
-                    if (product) {
-                        renderProductDetails(product);
-                        productDetailModal.classList.remove('hidden');
-                        backdrop.classList.remove('hidden');
-                    }
-                }
-            });
-            
-            categoriesList.addEventListener('click', (e) => {
-                const categoryBtn = e.target.closest('.category-btn');
-                if (categoryBtn) {
-                    const category = categoryBtn.getAttribute('data-category');
-                    const filteredProducts = allProducts.filter(product => product.category === category);
-                    renderProducts(filteredProducts, productGrid);
-                }
-            });
-
-            detailAddToCartBtn.addEventListener('click', (e) => {
-                const productName = e.target.getAttribute('data-name');
-                const productPrice = parseFloat(e.target.getAttribute('data-price'));
-                
-                animateToCart(e.target);
-                addToCart(productName, productPrice);
-            });
-
-            function addToCart(name, price) {
-                const existingItem = cart.find(item => item.name === name);
-                if (existingItem) {
-                    existingItem.quantity++;
-                } else {
-                    cart.push({ name: name, price: price, quantity: 1 });
-                }
-                updateCartDisplay();
-
-                cartButton.classList.add('bouncing');
-                cartButton.addEventListener('animationend', () => {
-                    cartButton.classList.remove('bouncing');
-                }, { once: true });
-            }
-
-            function animateToCart(originElement) {
-                const buttonRect = originElement.getBoundingClientRect();
-                const cartRect = cartButton.getBoundingClientRect();
-
-                const flyingButton = document.createElement('div');
-                flyingButton.classList.add('fly-to-cart', 'bg-blue-600', 'rounded-full', 'w-8', 'h-8');
-                flyingButton.style.top = `${buttonRect.top}px`;
-                flyingButton.style.left = `${buttonRect.left}px`;
-                
-                document.body.appendChild(flyingButton);
-
-                requestAnimationFrame(() => {
-                    flyingButton.style.transform = `translate(${cartRect.left - buttonRect.left}px, ${cartRect.top - buttonRect.top}px) scale(0.5)`;
-                    flyingButton.style.opacity = '0';
-                });
-
-                flyingButton.addEventListener('transitionend', () => {
-                    flyingButton.remove();
-                });
-            }
-
-            function renderProductDetails(product) {
-                detailName.textContent = product.name;
-                detailPrice.textContent = `$${product.price.toFixed(2)}`;
-                detailDescription.textContent = product.description;
-                detailImg.src = product.img;
-                detailImg.alt = product.name;
-                
-                detailAddToCartBtn.setAttribute('data-name', product.name);
-                detailAddToCartBtn.setAttribute('data-price', product.price);
-
-                detailRating.innerHTML = getStarRatingHtml(product.rating);
-            }
-
-            closeProductDetailBtn.addEventListener('click', () => {
-                productDetailModal.classList.add('hidden');
-                backdrop.classList.add('hidden');
-            });
-
-            checkoutBtn.addEventListener('click', () => {
-                if (cart.length > 0) {
-                    messageBox.classList.remove('hidden');
-                    cartSidebar.classList.add('translate-x-full');
-                    backdrop.classList.add('hidden');
-                    cart = [];
-                    updateCartDisplay();
-                } else {
-                    messageBox.querySelector('h4').textContent = "Cart is Empty!";
-                    messageBox.querySelector('p').textContent = "Please add items to your cart before checking out.";
-                    messageBox.classList.remove('hidden');
-                }
-            });
-
-            closeMessageBtn.addEventListener('click', () => {
-                messageBox.classList.add('hidden');
-                messageBox.querySelector('h4').textContent = "Thank You!";
-                messageBox.querySelector('p').textContent = "Your order has been placed successfully.";
-            });
-
-            // Initial rendering
-            renderCategories();
-            renderProducts(allProducts.slice(0, 8), productGrid); // Render 8 featured products
-            renderProducts(allProducts.slice(8, 12), recommendedGrid); // Render 4 recommended products
-            updateCartDisplay();
-            updateIndicators();
+                    </div>
+                    <button class="add-to-cart-btn mt-auto bg-blue-900 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-800 transition-colors duration-200" data-product-id="${product.id}">
+                        <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                    </button>
+                </div>
+            `;
+            container.appendChild(productCard);
         });
+    };
+
+    const renderCategories = () => {
+        const container = document.getElementById('category-container');
+        const sidebarContainer = document.getElementById('sidebar-category-list');
+        container.innerHTML = '';
+        sidebarContainer.innerHTML = '<h4 class="text-lg font-bold text-gray-700 mb-4">Categories</h4>';
+
+        categories.forEach(category => {
+            // Main category button
+            const categoryButton = document.createElement('button');
+            categoryButton.textContent = category.replace(/\+/g, ' ');
+            categoryButton.classList.add('category-filter', 'bg-white', 'text-gray-700', 'font-medium', 'py-2', 'px-4', 'rounded-full', 'shadow-sm', 'hover:bg-gray-200', 'transition-colors', 'duration-200');
+            categoryButton.dataset.category = category;
+            container.appendChild(categoryButton);
+
+            // Sidebar category checkbox
+            const sidebarCategoryItem = document.createElement('div');
+            sidebarCategoryItem.classList.add('flex', 'items-center', 'space-x-2');
+            sidebarCategoryItem.innerHTML = `
+                <input type="checkbox" id="filter-${category}" class="filter-checkbox rounded text-orange-500 focus:ring-orange-500" data-category="${category}">
+                <label for="filter-${category}" class="text-gray-700 text-sm">${category.replace(/\+/g, ' ')}</label>
+            `;
+            sidebarContainer.appendChild(sidebarCategoryItem);
+        });
+    };
+
+    const updateCart = () => {
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartTotalElement = document.getElementById('cart-total');
+        const cartCountElement = document.getElementById('cart-item-count');
+        
+        cartItemsContainer.innerHTML = '';
+        let total = 0;
+        let itemCount = 0;
+
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<div class="text-center text-gray-500 py-12">Your cart is empty.</div>';
+        } else {
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                itemCount += item.quantity;
+
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('flex', 'items-center', 'space-x-4', 'p-4', 'bg-gray-50', 'rounded-lg', 'shadow-sm');
+                cartItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0">
+                    <div class="flex-grow">
+                        <h4 class="font-semibold text-gray-800">${item.name}</h4>
+                        <p class="text-sm text-gray-500">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-gray-900">$${itemTotal.toFixed(2)}</span>
+                        <button class="remove-from-cart-btn ml-2 text-gray-400 hover:text-red-500 transition-colors duration-200" data-product-id="${item.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                cartItemsContainer.appendChild(cartItem);
+            });
+        }
+        cartTotalElement.textContent = `$${total.toFixed(2)}`;
+        cartCountElement.textContent = itemCount;
+        cartCountElement.classList.add('bouncing');
+        setTimeout(() => cartCountElement.classList.remove('bouncing'), 600);
+    };
+
+    const showProductModal = (product) => {
+        const modal = document.getElementById('product-modal');
+        document.getElementById('modal-image').src = product.image;
+        document.getElementById('modal-image').alt = product.name;
+        document.getElementById('modal-name').textContent = product.name;
+        document.getElementById('modal-price').textContent = `$${product.price.toFixed(2)}`;
+        document.getElementById('modal-ratings').innerHTML = getStarRating(product.rating);
+        document.getElementById('modal-description').textContent = product.description;
+        document.getElementById('modal-add-to-cart').dataset.productId = product.id;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            document.querySelector('#product-modal > div').classList.add('scale-100');
+            document.querySelector('#product-modal > div').classList.remove('scale-95');
+        }, 10);
+    };
+
+    const hideProductModal = () => {
+        const modal = document.getElementById('product-modal');
+        modal.classList.remove('opacity-100');
+        document.querySelector('#product-modal > div').classList.add('scale-95');
+        document.querySelector('#product-modal > div').classList.remove('scale-100');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    };
+
+    const handleCheckout = () => {
+        if (cart.length === 0) {
+            showMessage("Your cart is empty. Add items to checkout.");
+            return;
+        }
+
+        const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        showMessage(`Checkout successful! Total: $${totalAmount.toFixed(2)}`);
+        
+        // Clear the cart
+        cart = [];
+        updateCart();
+        
+        // Optionally close the cart sidebar
+        document.getElementById('cart-sidebar').classList.remove('open');
+    };
+
+    const setupListeners = () => {
+        // Product card click listener for modal
+        document.getElementById('featured-products-grid').addEventListener('click', (e) => {
+            const card = e.target.closest('div[data-product-id]');
+            if (card && !e.target.closest('.add-to-cart-btn')) {
+                const productId = parseInt(card.dataset.productId);
+                const product = getProductById(productId);
+                if (product) {
+                    showProductModal(product);
+                }
+            }
+        });
+
+        document.getElementById('recommended-products-grid').addEventListener('click', (e) => {
+            const card = e.target.closest('div[data-product-id]');
+            if (card && !e.target.closest('.add-to-cart-btn')) {
+                const productId = parseInt(card.dataset.productId);
+                const product = getProductById(productId);
+                if (product) {
+                    showProductModal(product);
+                }
+            }
+        });
+
+        // Close modal button
+        document.getElementById('close-modal').addEventListener('click', hideProductModal);
+
+        // Hamburger menu toggle
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const closeMenu = document.getElementById('close-menu');
+        const menuSidebar = document.getElementById('menu-sidebar');
+
+        hamburgerMenu.addEventListener('click', () => {
+            menuSidebar.classList.add('open');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            menuSidebar.classList.remove('open');
+        });
+
+        // Cart sidebar toggle
+        const cartIcon = document.getElementById('cart-icon');
+        const closeCart = document.getElementById('close-cart');
+        const cartSidebar = document.getElementById('cart-sidebar');
+
+        cartIcon.addEventListener('click', () => {
+            cartSidebar.classList.add('open');
+            updateCart();
+        });
+
+        closeCart.addEventListener('click', () => {
+            cartSidebar.classList.remove('open');
+        });
+
+        // Add to cart button listeners
+        document.getElementById('featured-products-grid').addEventListener('click', (e) => {
+            const btn = e.target.closest('.add-to-cart-btn');
+            if (btn) {
+                const productId = parseInt(btn.dataset.productId);
+                addToCart(productId, e);
+            }
+        });
+
+        document.getElementById('recommended-products-grid').addEventListener('click', (e) => {
+            const btn = e.target.closest('.add-to-cart-btn');
+            if (btn) {
+                const productId = parseInt(btn.dataset.productId);
+                addToCart(productId, e);
+            }
+        });
+
+        document.getElementById('modal-add-to-cart').addEventListener('click', (e) => {
+            const btn = e.target;
+            const productId = parseInt(btn.dataset.productId);
+            addToCart(productId, e);
+            hideProductModal();
+        });
+
+        // Remove from cart listener
+        document.getElementById('cart-items').addEventListener('click', (e) => {
+            const btn = e.target.closest('.remove-from-cart-btn');
+            if (btn) {
+                const productId = parseInt(btn.dataset.productId);
+                removeFromCart(productId);
+            }
+        });
+
+        // Profile dropdown toggle
+        const profileIcon = document.getElementById('profile-icon');
+        const profileDropdown = document.getElementById('profile-dropdown-menu');
+
+        profileIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+            if (!profileDropdown.classList.contains('hidden')) {
+                setTimeout(() => {
+                    profileDropdown.classList.add('scale-100', 'opacity-100');
+                    profileDropdown.classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            } else {
+                profileDropdown.classList.remove('scale-100', 'opacity-100');
+                profileDropdown.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => profileDropdown.classList.add('hidden'), 300);
+            }
+        });
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.classList.contains('hidden') && !profileDropdown.contains(e.target) && !profileIcon.contains(e.target)) {
+                profileDropdown.classList.remove('scale-100', 'opacity-100');
+                profileDropdown.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => profileDropdown.classList.add('hidden'), 300);
+            }
+        });
+
+        // Category filter listeners
+        document.querySelectorAll('.category-filter').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const category = e.target.dataset.category;
+                filterProducts(category);
+            });
+        });
+
+        // Checkout button listener
+        document.getElementById('checkout-btn').addEventListener('click', handleCheckout);
+    };
+
+    const addToCart = (productId, event) => {
+        const product = getProductById(productId);
+        if (!product) return;
+        
+        const existingItem = cart.find(item => item.id === productId);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ ...product, quantity: 1 });
+        }
+        
+        // Flying animation logic
+        const cartIcon = document.getElementById('cart-icon');
+        const cartRect = cartIcon.getBoundingClientRect();
+        
+        let targetElement = event.target;
+        if (!targetElement.tagName.toLowerCase().includes('img')) {
+            targetElement = event.target.closest('.bg-white').querySelector('img');
+        }
+
+        const productRect = targetElement.getBoundingClientRect();
+
+        const flyingImg = document.createElement('img');
+        flyingImg.src = product.image;
+        flyingImg.classList.add('flying-animation');
+        
+        Object.assign(flyingImg.style, {
+            top: `${productRect.top}px`,
+            left: `${productRect.left}px`,
+            width: `${productRect.width}px`,
+            height: `${productRect.height}px`,
+            opacity: '1',
+            transform: 'scale(1)',
+        });
+        
+        document.body.appendChild(flyingImg);
+        
+        setTimeout(() => {
+            Object.assign(flyingImg.style, {
+                top: `${cartRect.top + cartRect.height / 2 - 20}px`,
+                left: `${cartRect.left + cartRect.width / 2 - 20}px`,
+                width: '40px',
+                height: '40px',
+                opacity: '0.5',
+                transform: 'scale(0.25)',
+            });
+        }, 10);
+        
+        flyingImg.addEventListener('transitionend', () => {
+            if (flyingImg.parentNode) {
+                flyingImg.parentNode.removeChild(flyingImg);
+            }
+            showMessage('Item added to cart!');
+            updateCart();
+        });
+    };
+
+    const removeFromCart = (productId) => {
+        cart = cart.filter(item => item.id !== productId);
+        updateCart();
+    };
+
+    const filterProducts = (category) => {
+        const featuredProductsContainer = document.getElementById('featured-products-grid');
+        const recommendedProductsContainer = document.getElementById('recommended-products-grid');
+        
+        const filteredProducts = category === 'All' ? products : products.filter(p => p.category.replace(' ', '+') === category.replace(' ', '+'));
+
+        // For simplicity, just render a subset to each section
+        const featured = filteredProducts.slice(0, 5);
+        const recommended = filteredProducts.slice(5, 10);
+
+        renderProducts(featured, 'featured-products-grid');
+        renderProducts(recommended, 'recommended-products-grid');
+    };
+
+    // Carousel Logic
+    let currentSlide = 0;
+    const slides = document.getElementById('carousel-slides');
+    const indicators = document.querySelectorAll('.carousel-indicator');
+    const totalSlides = slides.children.length;
+
+    const updateCarousel = () => {
+        const offset = -currentSlide * 100;
+        slides.style.transform = `translateX(${offset}%)`;
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentSlide);
+        });
+    };
+
+    document.getElementById('next-slide').addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+    });
+
+    document.getElementById('prev-slide').addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateCarousel();
+    });
+
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+            currentSlide = index;
+            updateCarousel();
+        });
+    });
+
+
+    // Initial render on page load
+    window.onload = () => {
+        renderCategories();
+        // Render a subset of products for the initial view
+        renderProducts(products.slice(0, 5), 'featured-products-grid');
+        renderProducts(products.slice(5, 10), 'recommended-products-grid');
+        updateCarousel();
+        setupListeners();
+    };
