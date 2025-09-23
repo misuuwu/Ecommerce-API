@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signInWithCustomToken, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 // Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCyAr0qASJYxgqTSONKXaWYiMFHKYta9iY",
@@ -63,6 +63,22 @@ async function initializeAuth() {
     }
 }
 
+// Logout functionality
+const logoutLink = document.getElementById('logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            await signOut(auth);
+            showMessage("Logout successful!");
+            window.location.href = 'login.html'; // Redirect to login page after logout
+        } catch (error) {
+            console.error("Logout error:", error);
+            showMessage(`Logout error: ${error.message}`);
+        }
+    });
+}
+
 // Listen for authentication state changes and update the UI
 onAuthStateChanged(auth, (user) => {
     const signinLink = document.getElementById('signin-link');
@@ -97,6 +113,7 @@ if (loginForm) {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             showMessage("Login successful!");
+            window.location.href = 'dashboard.html'; // Add this line to redirect
             // You can redirect to the profile page or update the UI here
         } catch (error) {
             let errorMessage = "An error occurred during login. Please try again.";
