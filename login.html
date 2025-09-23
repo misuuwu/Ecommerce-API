@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In</title>
+    <title>Login & Signup</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,121 +20,187 @@
             align-items: center;
             min-height: 100vh;
         }
-        .login-container {
+        .auth-container {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            padding: 3rem;
             border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 900px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #d1d5db;
-            background-color: rgba(255, 255, 255, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
             color: white;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease-in-out;
         }
-        .form-input:focus {
+        .form-container {
+            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+            width: 100%;
+        }
+        .form-container.login {
+            transform: rotateY(0deg);
+            opacity: 1;
+            z-index: 2;
+        }
+        .form-container.signup {
+            transform: rotateY(-180deg);
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .form-container.visible {
+            transform: rotateY(0deg);
+            opacity: 1;
+            z-index: 2;
+        }
+        .form-container.hidden {
+            transform: rotateY(-180deg);
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group input {
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 1rem 3rem 1rem 1rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            color: white;
             outline: none;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-color: #ff8c00;
         }
-        .form-input::placeholder {
-            color: #d1d5db;
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
-        .label {
-            color: white;
-            font-weight: 500;
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
         }
         .social-btn {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 1rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0.75rem 1rem;
-            border-radius: 9999px;
-            background-color: white;
-            color: #333;
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: background-color 0.3s ease;
         }
         .social-btn:hover {
-            background-color: #f3f4f6;
+            background: rgba(255, 255, 255, 0.5);
         }
+        .social-btn span {
+            color: white;
+            font-weight: 600;
+        }
+        .message-box {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-200%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            z-index: 1000;
+            transition: transform 0.5s ease-in-out;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .message-box.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="login-container grid grid-cols-1 md:grid-cols-2 gap-8 items-center text-white">
-        <!-- Left side: Log In Form -->
-        <div class="space-y-6">
-            <h1 class="text-6xl font-extrabold mb-4">Log In</h1>
-            
-            <div class="space-y-4">
-                <div>
-                    <label for="email" class="label block mb-2">Email Address</label>
-                    <input type="email" id="email" class="form-input" placeholder="Enter a valid email address">
-                </div>
-                <div>
-                    <label for="password" class="label block mb-2">Password</label>
-                    <div class="relative">
-                        <input type="password" id="password" class="form-input pr-10" placeholder="At least 8 characters, A-Z 0-9">
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-white" onclick="togglePasswordVisibility('password')">
-                            <i id="password-toggle" class="fas fa-eye"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box"></div>
 
-            <button class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-12 rounded-full transition-colors duration-200 shadow-lg w-full">
-                Log In
-            </button>
-        </div>
-
-        <!-- Right side: Social Log In -->
-        <div class="text-center space-y-6 md:space-y-8">
-            <p>Don't have an account yet? <a href="signup.html" class="font-bold underline text-orange-400 hover:text-orange-300 transition-colors">Create account</a></p>
-            
-            <div class="flex items-center space-x-4">
+    <div class="auth-container relative overflow-hidden h-[550px] sm:h-auto p-8">
+        <!-- Login Form -->
+        <div id="loginForm" class="form-container visible">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-6">Log In</h1>
+            <p class="text-lg text-gray-200 mb-6">Welcome back, let's sign in to continue</p>
+            <form id="login" class="space-y-6">
+                <input type="email" id="loginEmail" placeholder="Email" class="w-full bg-white bg-opacity-30 border border-white border-opacity-50 text-white rounded-xl py-3 px-5 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all">
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="Password" class="w-full bg-white bg-opacity-30 border border-white border-opacity-50 text-white rounded-xl py-3 px-5 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all">
+                    <i id="loginPassword-toggle" class="fa-solid fa-eye absolute top-1/2 right-4 transform -translate-y-1/2 text-white text-opacity-70 cursor-pointer" onclick="togglePasswordVisibility('loginPassword')"></i>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-orange-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105">Log In</button>
+            </form>
+            <p class="mt-4 text-sm text-gray-300">
+                Don't have an account? <a href="#" id="showSignup" class="underline text-orange-400 hover:text-orange-300 transition-colors">Sign up here</a>
+            </p>
+            <div class="flex items-center space-x-4 my-6">
                 <hr class="flex-grow border-gray-400">
                 <span class="text-gray-300">Or continue with</span>
                 <hr class="flex-grow border-gray-400">
             </div>
-
             <div class="space-y-4">
-                <a href="#" class="social-btn w-full">
+                <a href="#" class="social-btn w-full text-white hover:text-gray-200 transition-colors">
+                    <i class="fab fa-google mr-4 text-xl"></i>
+                    <span>Sign in with Google</span>
+                </a>
+                <a href="#" class="social-btn w-full text-white hover:text-gray-200 transition-colors">
+                    <i class="fab fa-facebook mr-4 text-xl text-blue-600"></i>
+                    <span>Sign in with Facebook</span>
+                </a>
+            </div>
+            <p class="mt-4 text-sm"><a href="#" class="underline text-orange-400 hover:text-orange-300 transition-colors">Forgot Password? Click here to reset</a></p>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="form-container hidden">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-6">Sign Up</h1>
+            <p class="text-lg text-gray-200 mb-6">Join us to explore and share your passions</p>
+            <form id="signup" class="space-y-6">
+                <input type="email" id="signupEmail" placeholder="Email" class="w-full bg-white bg-opacity-30 border border-white border-opacity-50 text-white rounded-xl py-3 px-5 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all">
+                <div class="input-group">
+                    <input type="password" id="signupPassword" placeholder="Password" class="w-full bg-white bg-opacity-30 border border-white border-opacity-50 text-white rounded-xl py-3 px-5 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all">
+                    <i id="signupPassword-toggle" class="fa-solid fa-eye absolute top-1/2 right-4 transform -translate-y-1/2 text-white text-opacity-70 cursor-pointer" onclick="togglePasswordVisibility('signupPassword')"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="signupConfirmPassword" placeholder="Confirm Password" class="w-full bg-white bg-opacity-30 border border-white border-opacity-50 text-white rounded-xl py-3 px-5 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all">
+                    <i id="signupConfirmPassword-toggle" class="fa-solid fa-eye absolute top-1/2 right-4 transform -translate-y-1/2 text-white text-opacity-70 cursor-pointer" onclick="togglePasswordVisibility('signupConfirmPassword')"></i>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-orange-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105">Sign Up</button>
+            </form>
+            <p class="mt-4 text-sm text-gray-300">
+                Already have an account? <a href="#" id="showLogin" class="underline text-orange-400 hover:text-orange-300 transition-colors">Log in here</a>
+            </p>
+            <div class="flex items-center space-x-4 my-6">
+                <hr class="flex-grow border-gray-400">
+                <span class="text-gray-300">Or continue with</span>
+                <hr class="flex-grow border-gray-400">
+            </div>
+            <div class="space-y-4">
+                <a href="#" class="social-btn w-full text-white hover:text-gray-200 transition-colors">
                     <i class="fab fa-google mr-4 text-xl"></i>
                     <span>Sign up with Google</span>
                 </a>
-                <a href="#" class="social-btn w-full">
+                <a href="#" class="social-btn w-full text-white hover:text-gray-200 transition-colors">
                     <i class="fab fa-facebook mr-4 text-xl text-blue-600"></i>
                     <span>Sign up with Facebook</span>
                 </a>
             </div>
-            <p class="mt-4"><a href="#" class="underline text-orange-400 hover:text-orange-300 transition-colors">Forgot Password? Click here to reset</a></p>
         </div>
     </div>
 
-    <script>
-        function togglePasswordVisibility(fieldId) {
-            const passwordField = document.getElementById(fieldId);
-            const toggleIcon = document.getElementById(`${fieldId}-toggle`);
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
-            } else {
-                passwordField.type = "password";
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
-            }
-        }
-    </script>
+<script type="module" src="firebase.js"></script>
+
 </body>
 </html>

@@ -18,6 +18,7 @@
     ];
 
     const categories = ["All", "Electronics", "Appliances", "Outdoor", "Accessories", "Smart Home", "Fitness"];
+    const wishlist = new Set();
 
     // Cart State
     let cart = [];
@@ -62,14 +63,21 @@
         const container = document.getElementById(containerId);
         container.innerHTML = ''; // Clear previous content
         productsToRender.forEach(product => {
+            const isWishlisted = wishlist.has(product.id);
+            const heartIconClass = isWishlisted ? 'fas fa-heart' : 'far fa-heart';
+            const heartColorClass = isWishlisted ? 'text-red-500' : 'text-gray-500';
+
             const productCard = document.createElement('div');
-            productCard.classList.add('bg-white', 'rounded-2xl', 'shadow-md', 'p-4', 'hover:shadow-xl', 'transition-shadow', 'duration-300', 'cursor-pointer', 'flex', 'flex-col', 'items-center', 'text-center');
+            productCard.classList.add('bg-white', 'rounded-2xl', 'shadow-md', 'p-4', 'hover:shadow-xl', 'transition-shadow', 'duration-300', 'flex', 'flex-col', 'text-center', 'relative');
             productCard.dataset.productId = product.id;
             productCard.innerHTML = `
-                <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-xl mb-4">
+                <button class="wishlist-btn absolute top-4 right-4 text-gray-500 hover:text-red-500 transition-colors duration-200" data-product-id="${product.id}">
+                    <i class="fa-heart text-xl ${isWishlisted ? 'fas' : 'far'}"></i>
+                </button>
+                <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-xl mb-4 cursor-pointer">
                 <div class="flex-grow flex flex-col justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold mb-1">${product.name}</h3>
+                        <h3 class="text-lg font-semibold mb-1 cursor-pointer">${product.name}</h3>
                         <p class="text-sm text-gray-500 mb-2">${product.category}</p>
                         <p class="text-lg font-bold text-orange-600 mb-2">$${product.price.toFixed(2)}</p>
                         <div class="flex items-center justify-center text-yellow-400 mb-2">
@@ -158,8 +166,22 @@
         document.getElementById('modal-name').textContent = product.name;
         document.getElementById('modal-price').textContent = `$${product.price.toFixed(2)}`;
         document.getElementById('modal-ratings').innerHTML = getStarRating(product.rating);
-        document.getElementById('modal-description').textContent = product.description;
         document.getElementById('modal-add-to-cart').dataset.productId = product.id;
+        document.getElementById('modal-buy-now').dataset.productId = product.id;
+        
+        // Update modal wishlist button based on state
+        const modalWishlistBtn = document.getElementById('modal-wishlist-btn');
+        modalWishlistBtn.dataset.productId = product.id;
+        const modalHeartIcon = modalWishlistBtn.querySelector('i');
+        if (wishlist.has(product.id)) {
+            modalHeartIcon.classList.remove('far');
+            modalHeartIcon.classList.add('fas');
+            modalHeartIcon.classList.add('text-red-500');
+        } else {
+            modalHeartIcon.classList.remove('fas', 'text-red-500');
+            modalHeartIcon.classList.add('far');
+        }
+
         modal.classList.remove('hidden');
         setTimeout(() => {
             modal.classList.add('opacity-100');
@@ -193,11 +215,30 @@
         document.getElementById('cart-sidebar').classList.remove('open');
     };
 
+    const toggleWishlist = (productId) => {
+        const isWishlisted = wishlist.has(productId);
+        const product = getProductById(productId);
+        if (isWishlisted) {
+            wishlist.delete(productId);
+            showMessage(`Item removed from wishlist!`);
+        } else {
+            wishlist.add(productId);
+            showMessage(`Item added to wishlist!`);
+        }
+        // Update all heart icons for this product
+        document.querySelectorAll(`.wishlist-btn[data-product-id="${productId}"] i, #modal-wishlist-btn[data-product-id="${productId}"] i`).forEach(icon => {
+            icon.classList.toggle('fas', !isWishlisted);
+            icon.classList.toggle('far', isWishlisted);
+            icon.classList.toggle('text-red-500', !isWishlisted);
+            icon.classList.toggle('text-gray-500', isWishlisted);
+        });
+    };
+
     const setupListeners = () => {
         // Product card click listener for modal
         document.getElementById('featured-products-grid').addEventListener('click', (e) => {
             const card = e.target.closest('div[data-product-id]');
-            if (card && !e.target.closest('.add-to-cart-btn')) {
+            if (card && !e.target.closest('.add-to-cart-btn') && !e.target.closest('.wishlist-btn')) {
                 const productId = parseInt(card.dataset.productId);
                 const product = getProductById(productId);
                 if (product) {
@@ -208,7 +249,7 @@
 
         document.getElementById('recommended-products-grid').addEventListener('click', (e) => {
             const card = e.target.closest('div[data-product-id]');
-            if (card && !e.target.closest('.add-to-cart-btn')) {
+            if (card && !e.target.closest('.add-to-cart-btn') && !e.target.closest('.wishlist-btn')) {
                 const productId = parseInt(card.dataset.productId);
                 const product = getProductById(productId);
                 if (product) {
@@ -269,6 +310,37 @@
             const productId = parseInt(btn.dataset.productId);
             addToCart(productId, e);
             hideProductModal();
+        });
+        
+        document.getElementById('modal-buy-now').addEventListener('click', (e) => {
+            const btn = e.target;
+            const productId = parseInt(btn.dataset.productId);
+            addToCart(productId, e);
+            hideProductModal();
+            handleCheckout();
+        });
+
+        // Wishlist button listeners
+        document.getElementById('featured-products-grid').addEventListener('click', (e) => {
+            const btn = e.target.closest('.wishlist-btn');
+            if (btn) {
+                const productId = parseInt(btn.dataset.productId);
+                toggleWishlist(productId);
+            }
+        });
+
+        document.getElementById('recommended-products-grid').addEventListener('click', (e) => {
+            const btn = e.target.closest('.wishlist-btn');
+            if (btn) {
+                const productId = parseInt(btn.dataset.productId);
+                toggleWishlist(productId);
+            }
+        });
+
+        document.getElementById('modal-wishlist-btn').addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            const productId = parseInt(btn.dataset.productId);
+            toggleWishlist(productId);
         });
 
         // Remove from cart listener
@@ -334,8 +406,20 @@
         const cartRect = cartIcon.getBoundingClientRect();
         
         let targetElement = event.target;
-        if (!targetElement.tagName.toLowerCase().includes('img')) {
-            targetElement = event.target.closest('.bg-white').querySelector('img');
+        // Find the image for the animation. If the click target is the button icon or text, find the parent card's image.
+        if (targetElement.tagName.toLowerCase() !== 'img') {
+            const productCard = event.target.closest('div[data-product-id]');
+            if (productCard) {
+                targetElement = productCard.querySelector('img');
+            } else if (event.target.closest('#modal-add-to-cart') || event.target.closest('#modal-buy-now')) {
+                targetElement = document.getElementById('modal-image');
+            }
+        }
+
+        if (!targetElement) {
+            showMessage('Item added to cart!');
+            updateCart();
+            return;
         }
 
         const productRect = targetElement.getBoundingClientRect();
