@@ -1,15 +1,15 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signInWithCustomToken, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signInWithCustomToken, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCyAr0qASJYxgqTSONKXaWYiMFHKYta9iY",
-    authDomain: "digisoria-a7cbc.firebaseapp.com",
-    projectId: "digisoria-a7cbc",
-    storageBucket: "digisoria-a7cbc.firebasestorage.app",
-    messagingSenderId: "410395314223",
-    appId: "1:410395314223:web:9efcbe4ba38eff16f95eda",
-    measurementId: "G-89HW0EKHK3"
+    apiKey: "AIzaSyAqDLocdi1CDHDeD5Z_LOlVZOycI2tuJpk",
+    authDomain: "digisoria-baa83.firebaseapp.com",
+    projectId: "digisoria-baa83",
+    storageBucket: "digisoria-baa83.firebasestorage.app",
+    messagingSenderId: "1042609120554",
+    appId: "1:1042609120554:web:0500a100e9ae42ead32a53",
+    measurementId: "G-TM8CBPSRR9"
 };
 
 // Global variables for Firebase auth token provided by the environment
@@ -46,6 +46,7 @@ window.togglePasswordVisibility = togglePasswordVisibility;
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+let isAuthReady = false;
 
 // Firebase Initialization
 async function initializeAuth() {
@@ -86,7 +87,10 @@ onAuthStateChanged(auth, (user) => {
 
     if (user) {
         console.log("User is signed in. UID:", user.uid);
-        showMessage(`Logged in as: ${user.email || 'Anonymous user'}`);
+        // We now wait for the user state to be confirmed before showing a message
+        if (isAuthReady) {
+            showMessage(`Logged in as: ${user.email || 'Anonymous user'}`);
+        }
         
         if (signinLink && userDisplayName) {
             userDisplayName.textContent = user.displayName || user.email; // Use displayName or email
@@ -96,9 +100,10 @@ onAuthStateChanged(auth, (user) => {
         console.log("User is signed out.");
         if (signinLink && userDisplayName) {
             userDisplayName.textContent = 'Sign in';
-            signinLink.href = 'signup.html';
+            signinLink.href = 'login.html';
         }
     }
+    isAuthReady = true;
 });
 
 initializeAuth();
@@ -113,8 +118,8 @@ if (loginForm) {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             showMessage("Login successful!");
-            window.location.href = 'dashboard.html'; // Add this line to redirect
-            // You can redirect to the profile page or update the UI here
+            window.location.href = 'seed.html'; // Add this line to redirect
+          
         } catch (error) {
             let errorMessage = "An error occurred during login. Please try again.";
             if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
@@ -148,7 +153,8 @@ if (signupForm) {
         try {
             await createUserWithEmailAndPassword(auth, email, password);
             showMessage("Account created successfully!");
-            // You can redirect to the profile page or update the UI here
+            window.location.href = 'login.html'; 
+           
         } catch (error) {
             let errorMessage = "An error occurred during signup. Please try again.";
             if (error.code === 'auth/email-already-in-use') {
