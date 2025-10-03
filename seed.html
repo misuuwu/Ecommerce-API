@@ -7,20 +7,19 @@
     <title>DigiSoria</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // *** Updated Tailwind Config for a Light/Bright eCommerce Theme ***
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        // Light/Bright Theme Colors
-                        'primary-blue': '#1F46A9', // Darker blue for main elements/buttons
-                        'secondary-gray': '#F9FAFB', // Very light background
-                        'accent-orange': '#FF6B1F', // Bright orange for accents (for Checkout button)
-                        'text-dark': '#1F2937', // Dark text
-                        'text-muted': '#6B7280', // Muted text/descriptions
+
+                        'primary-blue': '#1F46A9',
+                        'secondary-gray': '#F9FAFB',
+                        'accent-orange': '#FF6B1F',
+                        'text-dark': '#1F2937',
+                        'text-muted': '#6B7280',
                         'red-danger': '#EF4444',
-                        'light-bg': '#FFFFFF', // White for cards and navigation
-                        'page-bg': '#F3F4F6', // Light gray for the overall page background
+                        'light-bg': '#FFFFFF',
+                        'page-bg': '#F3F4F6',
                     },
                     boxShadow: {
                         'custom-light': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -32,192 +31,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
 
-        .bouncing {
-            animation: bounce 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
-        }
-
-        @keyframes bounce {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.2);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .product-card {
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Styling for the user profile dropdown menu */
-        .profile-menu {
-            display: none;
-        }
-
-        .profile-menu.open {
-            display: block;
-        }
-
-        /* Carousel Indicator Active State */
-        .carousel-indicator.active {
-            background-color: '#FF6B1F';
-            /* accent-orange */
-            width: 1rem;
-            opacity: 1;
-        }
-
-        /* Shopping Cart Drawer Styles */
-        #cart-drawer {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 100%;
-            max-width: 420px;
-            /* Wider than usual for product detail */
-            height: 100%;
-            background-color: #F9FAFB;
-            /* secondary-gray */
-            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-            z-index: 50;
-            /* Higher than header */
-            display: flex;
-            flex-direction: column;
-        }
-
-        #cart-drawer.open {
-            transform: translateX(0);
-        }
-
-        /* Backdrop overlay */
-        #cart-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 40;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        #cart-backdrop.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Order Review Screen Styles */
-        #order-review-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #F3F4F6;
-            /* page-bg */
-            z-index: 60;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        #order-review-screen.open {
-            transform: translateX(0);
-        }
-
-        /* Track Order Screen Styles */
-        #track-order-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #F3F4F6;
-            /* page-bg */
-            z-index: 70;
-            /* Above review screen */
-            transform: translateY(100%);
-            transition: transform 0.3s ease-in-out;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        #track-order-screen.open {
-            transform: translateY(0);
-        }
-
-        /* Progress Bar Styling */
-        .progress-step {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
-
-        .progress-bar-line {
-            position: absolute;
-            top: 20px;
-            /* Aligns with the middle of the circles */
-            left: 0;
-            right: 0;
-            height: 4px;
-            background-color: #D1D5DB;
-            /* Gray */
-            z-index: 1;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: #FF6B1F;
-            /* Accent Orange */
-            transition: width 0.5s ease-in-out;
-        }
-
-        .step-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #D1D5DB;
-            /* Default gray */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 8px;
-            transition: background-color 0.3s ease;
-        }
-
-        .step-icon.active {
-            background-color: #FF6B1F;
-            /* Accent Orange */
-            box-shadow: 0 0 0 4px rgba(255, 107, 31, 0.3);
-        }
-
-        .step-icon i {
-            color: white;
-            transition: color 0.3s ease;
-        }
-    </style>
 </head>
 
 <body class="bg-page-bg font-sans antialiased text-text-dark">
@@ -226,10 +40,10 @@
         <div class="container mx-auto py-4 px-0 md:px-4 flex justify-between items-center">
 
             <div class="flex items-center space-x-4 pl-4 md:pl-0">
-                <button class="text-white hover:text-accent-orange transition-colors">
+                <button id="menu-button" class="text-white hover:text-accent-orange transition-colors">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
-                <a href="index.html" class="text-2xl font-bold text-white hidden sm:block">DigiSoria</a>
+                <a href="seed.html" class="text-2xl font-bold text-white hidden sm:block">DigiSoria</a>
             </div>
 
             <div class="flex flex-grow max-w-lg mx-2 md:mx-8">
@@ -267,11 +81,14 @@
                         <div
                             class="absolute right-3 -top-2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-white">
                         </div>
-                        <a href="profile.html" class="block px-4 py-2 text-text-dark hover:bg-gray-100 font-medium">My Profile</a>
-                        <a href="#" class="block px-4 py-2 text-text-dark hover:bg-gray-100">Order History</a>
-                        <a href="sellerpage.html" class="block px-4 py-2 text-text-dark hover:bg-gray-100 border-t mt-1 pt-2">Start
+                        <a href="profile.html" class="block px-4 py-2 text-text-dark hover:bg-gray-100 font-medium">My
+                            Profile</a>
+                        <a href="message.html" class="block px-4 py-2 text-text-dark hover:bg-gray-100">Messages</a>
+                        <a href="sellerpage.html"
+                            class="block px-4 py-2 text-text-dark hover:bg-gray-100 border-t mt-1 pt-2">Start
                             Selling</a>
-                        <a href="login.html" id="auth-toggle-btn" class="block px-4 py-2 text-red-danger hover:bg-gray-100">
+                        <a href="login.html" id="auth-toggle-btn"
+                            class="block px-4 py-2 text-red-danger hover:bg-gray-100">
                             <span id="auth-button-text">Log In / Sign Out</span>
                         </a>
                     </div>
@@ -291,7 +108,8 @@
                 <div
                     class="flex-shrink-0 w-full bg-primary-blue text-white p-8 md:p-16 flex flex-col justify-center items-center text-center">
                     <h1 class="text-3xl md:text-5xl font-extrabold mb-4">New Arrivals!</h1>
-                    <p class="text-md md:text-lg max-w-2xl mx-auto">Check out the latest tech and gadgets added this week!</p>
+                    <p class="text-md md:text-lg max-w-2xl mx-auto">Check out the latest tech and gadgets added this
+                        week!</p>
                 </div>
                 <div
                     class="flex-shrink-0 w-full bg-secondary-gray text-text-dark p-8 md:p-16 flex flex-col justify-center items-center text-center">
@@ -323,19 +141,21 @@
             <h2 class="text-2xl font-bold text-text-dark mb-4">Product Categories</h2>
             <div class="flex flex-wrap gap-3">
                 <button
-                    class="px-4 py-2 bg-white text-primary-blue border border-primary-blue rounded-full shadow-sm hover:bg-primary-blue hover:text-white transition-colors font-medium">All</button>
+                    class="px-4 py-2 bg-primary-blue text-white rounded-lg shadow-md hover:bg-blue-800 transition-colors font-semibold">All</button>
+
                 <button
-                    class="px-4 py-2 bg-white text-text-dark border border-gray-300 rounded-full shadow-sm hover:bg-gray-100 transition-colors font-medium">Electronics</button>
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Electronics</button>
                 <button
-                    class="px-4 py-2 bg-white text-text-dark border border-gray-300 rounded-full shadow-sm hover:bg-gray-100 transition-colors font-medium">Appliances</button>
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Appliances</button>
                 <button
-                    class="px-4 py-2 bg-white text-text-dark border border-gray-300 rounded-full shadow-sm hover:bg-gray-100 transition-colors font-medium">Outdoor</button>
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Outdoor</button>
                 <button
-                    class="px-4 py-2 bg-white text-text-dark border border-gray-300 rounded-full shadow-sm hover:bg-gray-100 transition-colors font-medium">Accessories</button>
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Accessories</button>
                 <button
-                    class="px-4 py-2 bg-white text-text-dark border border-gray-300 rounded-full shadow-sm hover:bg-gray-100 transition-colors font-medium">Smart Home</button>
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Smart
+                    Home</button>
                 <button
-                    class="px-4 py-2 bg-white text-text-dark border border-gray-300 rounded-full shadow-sm hover:bg-gray-100 transition-colors font-medium">Fitness</button>
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Fitness</button>
             </div>
         </section>
 
@@ -355,13 +175,82 @@
             </div>
         </section>
 
+
+
         <footer class="mt-12 text-center text-text-muted text-sm border-t pt-4">
             <p>&copy; 2024 DigiSoria. All rights reserved.</p>
         </footer>
     </div>
 
-    <div id="cart-backdrop"></div>
+    <div id="backdrop"></div>
 
+    <div id="filter-menu" class="text-text-dark">
+        <div class="flex justify-between items-center p-4 border-b">
+            <h2 class="text-2xl font-extrabold">Menu</h2>
+            <button id="close-menu-btn" class="text-text-muted hover:text-red-danger transition-colors text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto p-4 space-y-6">
+            <h3 class="text-lg font-bold text-primary-blue border-b pb-2">Filters</h3>
+
+            <div>
+                <h4 class="font-semibold text-text-dark mb-2">Price Range</h4>
+                <div class="flex items-center space-x-2">
+                    <input type="number" placeholder="Min"
+                        class="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-blue focus:border-primary-blue">
+                    <span>-</span>
+                    <input type="number" placeholder="Max"
+                        class="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-blue focus:border-primary-blue">
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-semibold text-text-dark mb-2">Rating</h4>
+                <select
+                    class="w-full p-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-primary-blue focus:border-primary-blue">
+                    <option>Any</option>
+                    <option>4 Stars & Up</option>
+                    <option>3 Stars & Up</option>
+                    <option>2 Stars & Up</option>
+                    <option>1 Star & Up</option>
+                </select>
+            </div>
+
+            <div>
+                <h4 class="font-semibold text-text-dark mb-2">Shipping</h4>
+                <label class="flex items-center text-sm">
+                    <input type="checkbox"
+                        class="h-4 w-4 text-primary-blue rounded focus:ring-primary-blue border-gray-300 mr-2">
+                    Free Shipping
+                </label>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-bold text-primary-blue mb-3">Categories</h4>
+                <div class="flex flex-col space-y-2 text-sm">
+                    <a href="#" class="hover:text-accent-orange transition-colors">Electronics</a>
+                    <a href="#" class="hover:text-accent-orange transition-colors">Appliances</a>
+                    <a href="#" class="hover:text-accent-orange transition-colors">Outdoor</a>
+                    <a href="#" class="hover:text-accent-orange transition-colors">Accessories</a>
+                    <a href="#" class="hover:text-accent-orange transition-colors">Smart Home</a>
+                    <a href="#" class="hover:text-accent-orange transition-colors">Fitness</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t-2 border-primary-blue/50 shadow-inner">
+            <button id="apply-filters-btn"
+                class="w-full py-3 bg-primary-blue text-white font-extrabold text-lg rounded-xl shadow-lg hover:bg-blue-800 transition-colors transform hover:scale-[1.01] active:scale-[0.99] mb-2">
+                Apply Filters
+            </button>
+            <button id="cancel-filters-btn"
+                class="w-full py-3 bg-gray-200 text-text-dark font-semibold text-lg rounded-xl shadow-md hover:bg-gray-300 transition-colors active:scale-[0.99]">
+                Cancel
+            </button>
+        </div>
+    </div>
     <div id="cart-drawer">
         <div class="p-5 border-b flex justify-between items-center bg-white shadow-sm">
             <h3 class="text-2xl font-bold text-primary-blue">Your Shopping Cart</h3>
@@ -393,10 +282,154 @@
             </button>
         </div>
     </div>
+
+    <div id="product-detail-modal">
+        <div
+            class="modal-content bg-light-bg rounded-xl shadow-2xl w-11/12 max-w-5xl transform transition-all duration-300 p-0">
+            <div class="bg-primary-blue md:bg-white p-4 md:p-6 rounded-t-xl sticky top-0 z-10 md:static">
+                <button id="close-detail-modal-btn"
+                    class="absolute top-4 right-4 text-white md:text-text-muted hover:text-red-danger transition-colors text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2 id="modal-product-name-mobile" class="text-white text-xl font-bold md:hidden">Product Detail</h2>
+            </div>
+
+            <div id="product-detail-content" class="flex flex-col lg:flex-row gap-6 p-4 md:p-6 pb-20 lg:pb-6">
+                <div class="w-full lg:w-1/2 flex flex-row-reverse md:flex-row gap-4">
+                    <div class="relative flex-grow h-72 md:h-[400px] bg-gray-200 rounded-xl overflow-hidden shadow-xl">
+                        <img id="detail-main-image" src="" alt="Main Product" class="w-full h-full object-contain p-2">
+                        <button
+                            class="absolute top-1/2 left-4 transform -translate-y-1/2 text-text-dark text-2xl p-2 rounded-full bg-white/70 hover:bg-white transition-colors cursor-pointer hidden">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button
+                            class="absolute top-1/2 right-4 transform -translate-y-1/2 text-text-dark text-2xl p-2 rounded-full bg-white/70 hover:bg-white transition-colors cursor-pointer hidden">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div id="detail-thumbnails"
+                        class="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-3 overflow-x-auto md:overflow-y-visible flex-shrink-0">
+                        <div
+                            class="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg border-2 border-primary-blue flex-shrink-0 cursor-pointer shadow-md">
+                        </div>
+                        <div
+                            class="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg border-2 border-transparent flex-shrink-0 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2 space-y-4 md:space-y-6">
+
+                    <div class="border-b pb-4">
+                        <h1 id="detail-product-name"
+                            class="text-2xl md:text-3xl font-extrabold text-text-dark mb-1 line-clamp-2">
+                            Product Name Placeholder
+                        </h1>
+                        <span id="detail-seller-property" class="text-sm text-text-muted font-medium block mb-2">DIZCAYA
+                            PROPERTY</span>
+
+                        <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-3">
+                            <span id="detail-price"
+                                class="text-3xl md:text-4xl font-extrabold text-red-danger mb-2 md:mb-0">$10,000.00</span>
+                            <div id="detail-rating" class="flex items-center text-amber-500 text-sm">
+                                <span class="ml-2 text-text-muted text-sm">(1.0)</span>
+                                <a href="#" class="ml-2 text-primary-blue hover:underline text-sm font-medium">View 345
+                                    Feedbacks</a>
+                            </div>
+                        </div>
+                        <p id="detail-shipping-date" class="text-text-muted text-sm font-medium flex items-center">
+                            <i class="fas fa-truck text-green-500 mr-2"></i>
+                            Get in October 20 - October 25
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="detail-color-select"
+                                class="block text-sm font-medium text-text-dark mb-2">Color</label>
+                            <select id="detail-color-select"
+                                class="w-full lg:w-3/4 p-3 border border-gray-300 rounded-lg bg-light-bg focus:ring-primary-blue focus:border-primary-blue transition-shadow">
+                                <option>White</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm font-medium text-text-dark">Quantity</span>
+                            <div class="flex items-center border border-gray-300 rounded-lg">
+                                <button id="detail-qty-decrease"
+                                    class="p-2 text-lg text-text-dark hover:bg-gray-100 rounded-l-lg transition-colors">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" id="detail-qty-input" value="1" min="1" max="500"
+                                    class="w-12 text-center text-md font-semibold text-text-dark border-x border-gray-300 p-2 focus:outline-none">
+                                <button id="detail-qty-increase"
+                                    class="p-2 text-lg text-text-dark hover:bg-gray-100 rounded-r-lg transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <span id="detail-in-stock" class="text-sm text-text-muted">In stock: 500</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t">
+                        <h2 class="text-xl font-bold text-text-dark mb-2">Product Description</h2>
+                        <p id="detail-description-property" class="text-text-muted text-sm font-medium block mb-3">
+                            DIZCAYA PROPERTY</p>
+                        <p id="detail-description"
+                            class="text-text-muted leading-relaxed text-sm max-h-36 overflow-y-auto">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                            laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+                            voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                            cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        </p>
+                    </div>
+
+
+                    <div
+                        class="flex items-center justify-between p-4 bg-secondary-gray rounded-xl shadow-inner border border-gray-200">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-12 h-12 bg-primary-blue rounded-full flex items-center justify-center text-white text-2xl flex-shrink-0">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div>
+                                <p id="detail-seller-name" class="font-bold text-lg text-text-dark">DigiSoria Seller</p>
+                                <p id="detail-seller-location" class="text-text-muted text-sm flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    Metro Manila
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            class="px-6 py-2 bg-primary-blue text-white font-semibold rounded-lg hover:bg-blue-800 transition-colors shadow-md">
+                            Chat Now
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div
+                class="fixed bottom-0 left-0 right-0 lg:static bg-white p-4 border-t-2 border-gray-100 lg:border-t flex space-x-4 shadow-2xl lg:shadow-none lg:rounded-b-xl max-w-5xl mx-auto">
+                <button id="detail-add-to-cart-btn"
+                    class="w-full py-3 border-2 border-primary-blue text-primary-blue font-extrabold text-lg rounded-xl shadow-md hover:bg-primary-blue hover:text-white transition-colors">
+                    ADD TO CART
+                </button>
+                <button id="detail-buy-now-btn"
+                    class="w-full py-3 bg-accent-orange text-white font-extrabold text-lg rounded-xl shadow-lg hover:bg-orange-600 transition-colors transform hover:scale-[1.01] active:scale-[0.99]">
+                    BUY NOW
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="order-review-screen">
     </div>
     <div id="track-order-screen">
     </div>
+</body>
+
     <script type="module">
         import {
             initializeApp
@@ -412,11 +445,10 @@
             collection,
             query,
             onSnapshot,
-            // Imports for Cart Persistence
+            where,
             doc,
             setDoc,
             getDoc,
-            // End Imports
             updateDoc,
             increment,
             setLogLevel
@@ -437,21 +469,12 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app); // Initialize Firebase Auth
-
-        // ===================================
-        // METRICS/ANALYTICS LOGIC
-        // ===================================
-
+        const auth = getAuth(app);
         const METRICS_COLLECTION = 'metrics';
         const METRICS_DOC_ID = 'funnel_counts';
         let CURRENT_USER_ID = 'not-authenticated-user-placeholder';
-        // <<< CORE FIX: New flag to ensure cart operations wait for authentication status
         let isAuthResolved = false;
 
-        /**
-         * Atomically increments a specified metric field in the Firestore for the current user.
-         */
         const updateUserMetric = async (fieldName) => {
             if (CURRENT_USER_ID === 'not-authenticated-user-placeholder') {
                 console.warn(`User is not authenticated. Cannot track metric: ${fieldName}.`);
@@ -485,7 +508,7 @@
          * Saves the current cartItems array to Firestore for the logged-in user.
          */
         const saveCartToFirestore = async () => {
-             // <<< CORE FIX: Check if auth is resolved AND user is logged in
+            // <<< CORE FIX: Check if auth is resolved AND user is logged in
             if (!isAuthResolved || CURRENT_USER_ID === 'not-authenticated-user-placeholder') {
                 console.warn("Authentication not resolved or user not logged in. Cannot save cart.");
                 return;
@@ -499,7 +522,9 @@
                 await setDoc(cartRef, {
                     items: cartItems,
                     lastUpdated: new Date().toISOString()
-                }, { merge: true }); // Use merge: true just in case
+                }, {
+                    merge: true
+                }); // Use merge: true just in case
                 console.log("Shopping cart saved to Firestore successfully.");
             } catch (e) {
                 console.error("Error saving cart to Firestore:", e);
@@ -579,7 +604,7 @@
         // ===================================
         const cartCountElement = document.getElementById('cart-count');
         const cartDrawer = document.getElementById('cart-drawer');
-        const cartBackdrop = document.getElementById('cart-backdrop');
+        const backdrop = document.getElementById('backdrop'); // RENAMED backdrop
         const cartItemsList = document.getElementById('cart-items-list');
         const cartTotalElement = document.getElementById('cart-total');
         const selectedItemCountElement = document.getElementById('selected-item-count');
@@ -720,17 +745,25 @@
 
         const toggleCartDrawer = () => {
             cartDrawer.classList.toggle('open');
-            cartBackdrop.classList.toggle('open');
+            backdrop.classList.toggle('open');
             if (cartDrawer.classList.contains('open')) {
                 renderCart();
+            }
+            // Close filter menu if cart is opened
+            if (cartDrawer.classList.contains('open') && filterMenu.classList.contains('open')) {
+                filterMenu.classList.remove('open');
+            }
+            // Close product detail modal if cart is opened
+            if (cartDrawer.classList.contains('open') && productDetailModal.classList.contains('open')) {
+                closeProductDetailModal();
             }
         };
 
         const updateQuantity = (index, action) => {
             // <<< CORE FIX: Gated function call
             if (!isAuthResolved) {
-                 alert('Loading...', 'Please wait for the page to finish loading user data.', 'info');
-                 return;
+                alert('Loading...', 'Please wait for the page to finish loading user data.', 'info');
+                return;
             }
 
             const item = cartItems[index];
@@ -749,8 +782,8 @@
         const deleteItem = (index) => {
             // <<< CORE FIX: Gated function call
             if (!isAuthResolved) {
-                 alert('Loading...', 'Please wait for the page to finish loading user data.', 'info');
-                 return;
+                alert('Loading...', 'Please wait for the page to finish loading user data.', 'info');
+                return;
             }
 
             cartItems.splice(index, 1);
@@ -758,17 +791,16 @@
             saveCartToFirestore();
         };
 
+
         const addToCart = (product) => {
             updateUserMetric('shoppingCartAdds');
 
-            // <<< CORE FIX: Gated function call
             if (!isAuthResolved) {
-                 alert('Loading...', 'Please wait for the page to finish loading user data.', 'info');
-                 return;
+                alert('Loading...', 'Please wait for the page to finish loading user data.', 'info');
+                return;
             }
 
             if (CURRENT_USER_ID === 'not-authenticated-user-placeholder') {
-                 // Prevent cart operations if not logged in
                 alert('Login Required', 'Please log in to add items to your persistent cart.', 'error');
                 return;
             }
@@ -781,26 +813,174 @@
                 cartItems.push({
                     name: product.name,
                     price: product.price,
-                    quantity: 1,
+                    quantity: product.quantity || 1, // Use product quantity from modal if available
                     image: product.image,
                     selected: true,
                 });
             }
 
             updateCartCountDisplay();
+
+            // If the cart drawer is already open, re-render the contents
+            if (cartDrawer.classList.contains('open')) {
+                renderCart();
+            }
+
+            // Show a success notification instead of forcing the drawer open
+            window.alert('Item Added', `${product.name} has been added to your cart.`, 'success');
+
+            // Add the bounce animation to the cart icon for visual feedback
             if (cartCountElement) {
                 cartCountElement.classList.add('bouncing');
                 setTimeout(() => {
                     cartCountElement.classList.remove('bouncing');
                 }, 600);
             }
-            if (!cartDrawer.classList.contains('open')) {
-                toggleCartDrawer();
-            } else {
-                renderCart();
-            }
+
             saveCartToFirestore();
         };
+
+        // ===================================
+        // NEW PRODUCT DETAIL MODAL LOGIC (FIX)
+        // ===================================
+
+        const productDetailModal = document.getElementById('product-detail-modal');
+        const closeDetailModalBtn = document.getElementById('close-detail-modal-btn');
+        const detailProductName = document.getElementById('detail-product-name');
+        const detailPrice = document.getElementById('detail-price');
+        const detailRating = document.getElementById('detail-rating');
+        const detailDescription = document.getElementById('detail-description');
+        const detailMainImage = document.getElementById('detail-main-image');
+        const detailColorSelect = document.getElementById('detail-color-select');
+        const detailQtyInput = document.getElementById('detail-qty-input');
+        const detailQtyDecrease = document.getElementById('detail-qty-decrease');
+        const detailQtyIncrease = document.getElementById('detail-qty-increase');
+        const detailAddToCartBtn = document.getElementById('detail-add-to-cart-btn');
+        const detailBuyNowBtn = document.getElementById('detail-buy-now-btn');
+        const detailInStock = document.getElementById('detail-in-stock');
+
+        let currentProduct = null;
+
+        const closeProductDetailModal = () => {
+            productDetailModal.classList.remove('open');
+            currentProduct = null;
+        };
+
+
+        const renderProductDetail = (product) => {
+            currentProduct = product;
+
+            // FIX 1: Set a fallback name/title
+            const name = product.name || 'Unknown Product';
+            detailProductName.textContent = name;
+            document.getElementById('modal-product-name-mobile').textContent = name;
+
+            // FIX 2: Populate all other fields from the product object
+            detailPrice.textContent = `$${parseFloat(product.price || 0).toFixed(2)}`;
+            detailDescription.textContent = product.description || 'No detailed description available.';
+            detailMainImage.src = product.image || 'https://placehold.co/600x600/e2e8f0/64748b?text=No+Image';
+
+            // Rating
+            const ratingHtml = getRatingStars(product.rating || 0) +
+                `<span class="ml-2 text-text-muted text-sm">(${parseFloat(product.rating || 0).toFixed(1)})</span>` +
+                `<a href="#" class="ml-2 text-primary-blue hover:underline text-sm font-medium">View 345 Feedbacks</a>`;
+            detailRating.innerHTML = ratingHtml;
+
+            // Quantity and Stock
+            const stock = product.stock || 500;
+            detailInStock.textContent = `In stock: ${stock}`;
+            detailQtyInput.value = 1;
+            detailQtyInput.max = stock;
+
+            // Variations/Colors (Placeholder logic)
+            detailColorSelect.innerHTML = product.options && product.options.colors ?
+                product.options.colors.map(c => `<option>${c}</option>`).join('') :
+                '<option>Default</option>';
+
+            // Seller Info Placeholder
+            document.getElementById('detail-seller-property').textContent = product.property || 'No Property Info';
+            document.getElementById('detail-description-property').textContent = product.property || 'No Property Info';
+
+            // Open the modal
+            productDetailModal.classList.add('open');
+        };
+
+
+        const handleDetailAddToCart = () => {
+            if (!currentProduct) return;
+            const quantity = parseInt(detailQtyInput.value);
+            const selectedColor = detailColorSelect.value;
+
+            // Create a cart item object with the selected quantity and variation
+            const cartProduct = {
+                id: currentProduct.id,
+                name: `${currentProduct.name} - ${selectedColor}`, // Include variation in name for cart distinction
+                price: currentProduct.price,
+                image: currentProduct.image,
+                quantity: quantity
+            };
+
+            addToCart(cartProduct);
+            closeProductDetailModal();
+        };
+
+        // Attach listeners for modal quantity controls
+        const attachDetailModalListeners = () => {
+            closeDetailModalBtn.addEventListener('click', closeProductDetailModal);
+            productDetailModal.addEventListener('click', (event) => {
+                // Close modal if user clicks on the semi-transparent background (not the content)
+                if (event.target === productDetailModal) {
+                    closeProductDetailModal();
+                }
+            });
+
+            detailQtyIncrease.addEventListener('click', () => {
+                let qty = parseInt(detailQtyInput.value);
+                const max = parseInt(detailQtyInput.max);
+                if (qty < max) {
+                    detailQtyInput.value = qty + 1;
+                }
+            });
+
+            detailQtyDecrease.addEventListener('click', () => {
+                let qty = parseInt(detailQtyInput.value);
+                if (qty > 1) {
+                    detailQtyInput.value = qty - 1;
+                }
+            });
+
+            detailAddToCartBtn.addEventListener('click', handleDetailAddToCart);
+
+            detailBuyNowBtn.addEventListener('click', () => {
+                // For simplicity, this acts like add to cart and then goes to checkout
+                handleDetailAddToCart();
+                openOrderReview();
+            });
+        };
+
+        // ===================================
+        // NEW FILTER MENU LOGIC
+        // ===================================
+
+        const menuButton = document.getElementById('menu-button');
+        const filterMenu = document.getElementById('filter-menu');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const cancelFiltersBtn = document.getElementById('cancel-filters-btn');
+        const applyFiltersBtn = document.getElementById('apply-filters-btn');
+
+        const toggleFilterMenu = () => {
+            filterMenu.classList.toggle('open');
+            backdrop.classList.toggle('open');
+            // Close cart if filter menu is opened
+            if (filterMenu.classList.contains('open') && cartDrawer.classList.contains('open')) {
+                cartDrawer.classList.remove('open');
+            }
+            // Close product detail modal if filter menu is opened
+            if (filterMenu.classList.contains('open') && productDetailModal.classList.contains('open')) {
+                closeProductDetailModal();
+            }
+        };
+
 
         // ===================================
         // ORDER REVIEW & TRACK ORDER LOGIC
@@ -904,10 +1084,10 @@
                         <button onclick="window.location.reload()" class="px-6 py-3 bg-primary-blue text-white font-semibold rounded-xl shadow-md hover:bg-blue-800 transition-colors">
                             Back to Shopping
                         </button>
-                        <button onclick="alert('Message feature not implemented')"
-                            class="px-6 py-3 bg-white text-text-dark border border-gray-300 font-semibold rounded-xl shadow-sm hover:bg-gray-100 transition-colors">
-                            Message Seller
-                        </button>
+                        <a href="message.html"
+   class="px-6 py-3 bg-white text-text-dark border border-gray-300 font-semibold rounded-xl shadow-sm hover:bg-gray-100 transition-colors">
+    Message Seller
+</a>
                     </div>
                 </div>
             `;
@@ -984,14 +1164,14 @@
             }
 
             if (CURRENT_USER_ID === 'not-authenticated-user-placeholder') {
-                 // Essential check for placing an order
+                // Essential check for placing an order
                 alert('Login Required', 'You must be logged in to proceed with checkout and order placement.', 'error');
                 return;
             }
 
             updateUserMetric('checkouts');
             cartDrawer.classList.remove('open');
-            cartBackdrop.classList.remove('open');
+            backdrop.classList.remove('open'); // Use generic backdrop
 
             let merchandiseSubtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const totalPayment = merchandiseSubtotal + SHIPPING_SUBTOTAL;
@@ -1132,6 +1312,15 @@
                 </div>
             `;
 
+            // Add listener to open the product detail modal on card click
+            card.addEventListener('click', (event) => {
+                // Only open the modal if the click target is NOT the Add to Cart button
+                if (!event.target.closest('.add-to-cart-btn')) {
+                    renderProductDetail(product);
+                }
+            });
+
+
             const addToCartButton = card.querySelector('.add-to-cart-btn');
             if (addToCartButton) {
                 addToCartButton.addEventListener('click', (event) => {
@@ -1147,6 +1336,69 @@
 
             featuredProductsGrid.appendChild(card);
         }
+
+        // ===================================
+        // PRODUCT FETCHING & CATEGORY LOGIC (UPDATED)
+        // ===================================
+
+        const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+        let unsubscribeProducts; // Variable to hold the unsubscribe function
+
+        const fetchProductsByCategory = (category) => {
+            // 1. Unsubscribe from the previous listener if it exists
+            if (unsubscribeProducts) {
+                unsubscribeProducts();
+            }
+
+            // 2. Build the new query
+            let productQuery;
+            if (category === 'All') {
+                productQuery = query(productsRef); // Query with no filter
+            } else {
+                // Query with a 'where' filter for the selected category
+                productQuery = query(productsRef, where('category', '==', category));
+            }
+
+            // 3. Set up the new listener
+            unsubscribeProducts = onSnapshot(productQuery, (querySnapshot) => {
+                featuredProductsGrid.innerHTML = '';
+                if (querySnapshot.empty) {
+                    featuredProductsGrid.innerHTML =
+                        '<p class="text-center text-text-muted col-span-full py-12">No products found in this category.</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const product = doc.data();
+                    product.id = doc.id;
+                    renderProductCard(product);
+                });
+            }, (error) => {
+                console.error("Error fetching products:", error);
+                featuredProductsGrid.innerHTML =
+                    '<p class="text-center text-red-danger col-span-full py-12">Failed to load products. Check console for details.</p>';
+            });
+        };
+
+
+
+        /**
+         * Handles the click event for category buttons.
+         * @param {Event} event The click event.
+         */
+        const handleCategoryClick = (event) => {
+            const button = event.currentTarget;
+            const category = button.dataset.category;
+
+            // 1. Update active button styling
+            document.querySelectorAll('.category-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // 2. Fetch products for the new category
+            fetchProductsByCategory(category);
+        };
+
 
         // --- Main Event Listener for DOM Ready ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1224,10 +1476,32 @@
                 }
             });
 
+            // --- FILTER MENU EVENT LISTENERS ---
+            menuButton.addEventListener('click', toggleFilterMenu);
+            closeMenuBtn.addEventListener('click', toggleFilterMenu);
+            cancelFiltersBtn.addEventListener('click', toggleFilterMenu);
+            applyFiltersBtn.addEventListener('click', () => {
+                alert('Filters Applied', 'Filters have been applied! (Functionality not implemented yet)', 'success');
+                toggleFilterMenu();
+            });
+
+            // --- CATEGORY BUTTONS EVENT LISTENERS (NEW) ---
+            document.querySelectorAll('.category-button').forEach(button => {
+                button.addEventListener('click', handleCategoryClick);
+            });
+
+
             // --- CART DRAWER EVENT LISTENERS ---
             document.getElementById('cart-button').addEventListener('click', toggleCartDrawer);
             document.getElementById('close-cart-btn').addEventListener('click', toggleCartDrawer);
-            document.getElementById('cart-backdrop').addEventListener('click', toggleCartDrawer);
+            // Updated backdrop to close either menu or cart
+            backdrop.addEventListener('click', () => {
+                if (cartDrawer.classList.contains('open')) {
+                    toggleCartDrawer();
+                } else if (filterMenu.classList.contains('open')) {
+                    toggleFilterMenu();
+                }
+            });
 
             selectAllCheckbox.addEventListener('change', (event) => {
                 const checked = event.target.checked;
@@ -1238,28 +1512,13 @@
 
             document.getElementById('checkout-button').addEventListener('click', openOrderReview);
 
+            // --- PRODUCT DETAIL MODAL LISTENERS (NEW) ---
+            attachDetailModalListeners();
+
 
             setLogLevel('debug');
-            const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-            const q = query(productsRef);
-
-            onSnapshot(q, (querySnapshot) => {
-                featuredProductsGrid.innerHTML = '';
-                if (querySnapshot.empty) {
-                    featuredProductsGrid.innerHTML =
-                        '<p class="text-center text-text-muted col-span-full py-12">No products available.</p>';
-                    return;
-                }
-                querySnapshot.forEach((doc) => {
-                    const product = doc.data();
-                    product.id = doc.id;
-                    renderProductCard(product);
-                });
-            }, (error) => {
-                console.error("Error fetching products:", error);
-                featuredProductsGrid.innerHTML =
-                    '<p class="text-center text-red-danger col-span-full py-12">Failed to load products. Check console for details.</p>';
-            });
+            // --- INITIAL PRODUCT LOAD: Start by fetching all products ---
+            fetchProductsByCategory('All');
         });
 
 
@@ -1287,7 +1546,7 @@
             document.body.appendChild(alertDiv);
         }
         window.alert = alert;
+
     </script>
-</body>
 
 </html>
