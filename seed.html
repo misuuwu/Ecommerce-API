@@ -140,22 +140,22 @@
         <section class="mb-8">
             <h2 class="text-2xl font-bold text-text-dark mb-4">Product Categories</h2>
             <div class="flex flex-wrap gap-3">
-                <button
-                    class="px-4 py-2 bg-primary-blue text-white rounded-lg shadow-md hover:bg-blue-800 transition-colors font-semibold">All</button>
+                <button data-category="All"
+                    class="px-4 py-2 bg-primary-blue text-white rounded-lg shadow-md hover:bg-blue-800 transition-colors font-semibold category-button active">All</button>
 
-                <button
-                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Electronics</button>
-                <button
-                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Appliances</button>
-                <button
-                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Outdoor</button>
-                <button
-                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Accessories</button>
-                <button
-                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Smart
+                <button data-category="Electronics"
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium category-button">Electronics</button>
+                <button data-category="Appliances"
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium category-button">Appliances</button>
+                <button data-category="Outdoor"
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium category-button">Outdoor</button>
+                <button data-category="Accessories"
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium category-button">Accessories</button>
+                <button data-category="Smart Home"
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium category-button">Smart
                     Home</button>
-                <button
-                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium">Fitness</button>
+                <button data-category="Fitness"
+                    class="px-4 py-2 bg-secondary-gray text-text-dark rounded-lg hover:bg-page-bg transition-colors font-medium category-button">Fitness</button>
             </div>
         </section>
 
@@ -175,11 +175,10 @@
             </div>
         </section>
 
-
-
         <footer class="mt-12 text-center text-text-muted text-sm border-t pt-4">
-            <p>&copy; 2024 DigiSoria. All rights reserved.</p>
+            <p>&copy; 2025 DigiSoria. All rights reserved.</p>
         </footer>
+        
     </div>
 
     <div id="backdrop"></div>
@@ -700,7 +699,7 @@
 
                             <div class="flex flex-col items-center pt-2 min-w-[4.5rem] flex-shrink-0">
                                 <span class="text-text-muted text-xs">Total</span>
-                                <span class="font-bold text-red-danger text-lg">$${(item.price * item.quantity).toFixed(2)}</span>
+                                <span class="font-bold text-red-danger text-lg">₱${(item.price * item.quantity).toFixed(2)}</span>
                             </div>
 
                             <button
@@ -1097,7 +1096,8 @@
         };
 
         const placeOrder = () => {
-            updateUserMetric('placeOrders');
+            // Log the metric for placing an order
+            updateUserMetric('placeOrders'); // THIS IS THE LINE THAT ADDS THE COUNT TO FIRESTORE
             console.log("Order Placed!");
 
             // 1. Filter out purchased items
@@ -1391,9 +1391,12 @@
 
             // 1. Update active button styling
             document.querySelectorAll('.category-button').forEach(btn => {
-                btn.classList.remove('active');
+                btn.classList.remove('active', 'bg-primary-blue', 'text-white');
+                btn.classList.add('bg-secondary-gray', 'text-text-dark');
             });
-            button.classList.add('active');
+            button.classList.add('active', 'bg-primary-blue', 'text-white');
+            button.classList.remove('bg-secondary-gray', 'text-text-dark');
+
 
             // 2. Fetch products for the new category
             fetchProductsByCategory(category);

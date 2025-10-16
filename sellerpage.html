@@ -11,13 +11,13 @@
                 extend: {
                     colors: {
                         // Custom colors based on the theme image
-                        'primary-blue': '#2563EB', // A deep, vibrant blue for main accents (like the header/banner)
-                        'secondary-blue': '#4F46E5', // A slightly darker blue for hover effects
-                        'accent-yellow': '#FBBF24', // Yellow for highlights/buttons
-                        'accent-red': '#EF4444', // Red for delete/danger
-                        'light-bg': '#F3F4F6', // The light grey background
-                        'card-bg': '#FFFFFF', // White background for cards and main content
-                        'dark-text': '#1F2937', // Darker text for readability
+                        'primary-blue': '#2563EB', 
+                        'secondary-blue': '#4F46E5', 
+                        'accent-yellow': '#FBBF24', 
+                        'accent-red': '#EF4444',
+                        'light-bg': '#F3F4F6', 
+                        'card-bg': '#FFFFFF', 
+                        'dark-text': '#1F2937', 
                     },
                 }
             }
@@ -26,7 +26,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-        // NOTE: setDoc is needed for saving to the public collection using a specific ID
         import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
         
         // Firebase global variables provided by the environment

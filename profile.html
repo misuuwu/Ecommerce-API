@@ -483,13 +483,13 @@
                                 <div>
                                     <label class="form-label block mb-2">Date of Birth:</label>
                                     <div class="flex space-x-4">
-                                        <select id="dob-date" class="form-input-group w-1/3 text-white-900">
+                                        <select id="dob-date" class="form-input-group w-1/3 text-black-900">
                                             <option value="">Date</option>
                                         </select>
-                                        <select id="dob-month" class="form-input-group w-1/3 text-white-900">
+                                        <select id="dob-month" class="form-input-group w-1/3 text-black-900">
                                             <option value="">Month</option>
                                         </select>
-                                        <select id="dob-year" class="form-input-group w-1/3 text-white-900">
+                                        <select id="dob-year" class="form-input-group w-1/3 text-black-900">
                                             <option value="">Year</option>
                                         </select>
                                     </div>
@@ -572,12 +572,15 @@
                     <i class="fas fa-arrow-left"></i>
                     <h2>Order History</h2>
                 </div>
-                <div class="empty-order-card">
+
+                <div id="orders-list-container" class="space-y-4">
+                    </div>
+
+                <div id="empty-orders-message" class="empty-order-card">
                     <span class="confused-emoji">😕</span>
                     <h2>You haven't placed any orders yet. Start shopping now!</h2>
                 </div>
             </main>
-
             <main id="settings-content" class="settings-container p-8 hidden">
                 <div class="settings-header">
                     <i class="fas fa-cog"></i>
@@ -765,23 +768,26 @@
     <div id="message-box" class="message-box">
         Changes applied successfully!
     </div>
+    
 <script type="module">
         // Corrected lines for profile.html
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        // UPDATED: Added collection and getDocs for Order History
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
-        // MODIFIED: Removed signInAnonymously. Added signOut (for completeness).
+        // Imports only necessary Auth functions (no signInAnonymously)
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-        
+
+        // UPDATED: Firebase Configuration with your new details
         const firebaseConfig = {
-            apiKey: "AIzaSyCyAr0qASJYxgqTSONKXaWYiMFHKYta9iY",
-            authDomain: "digisoria-a7cbc.firebaseapp.com",
-            projectId: "digisoria-a7cbc",
-            storageBucket: "digisoria-a7cbc.firebasestorage.app",
-            messagingSenderId: "410395314223",
-            appId: "1:410395314223:web:9efcbe4ba38eff16f95eda",
-            measurementId: "G-89HW0EKHK3"
+            apiKey: "AIzaSyAqDLocdi1CDHDeD5Z_LOlVZOycI2tuJpk",
+            authDomain: "digisoria-baa83.firebaseapp.com",
+            projectId: "digisoria-baa83",
+            storageBucket: "digisoria-baa83.firebasestorage.app",
+            messagingSenderId: "1042609120554",
+            appId: "1:1042609120554:web:0500a100e9ae42ead32a53",
+            measurementId: "G-TM8CBPSRR9"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -844,6 +850,10 @@
         const notificationsBackLink = document.getElementById('notifications-back-link');
         const addressBackLink = document.getElementById('address-back-link');
 
+        // NEW: DOM elements for Order History
+        const ordersListContainer = document.getElementById('orders-list-container');
+        const emptyOrdersMessage = document.getElementById('empty-orders-message');
+
         // Placeholder for user profile data
         let userProfile = {
             name: "N/A",
@@ -859,8 +869,85 @@
             image: "https://placehold.co/200x200/cccccc/333333?text=Profile"
         };
 
-        // REMOVED: authenticateAndLoadProfile function
+        // NEW: Function to create HTML for a single order card
+        function createOrderCardHtml(order) {
+            // ASSUMPTION: The order object has 'id', 'date', 'total', and an 'items' array.
+            const date = new Date(order.date).toLocaleDateString();
+            
+            // Create the list of items for the card body
+            const itemsHtml = order.items.map(item => `
+                <p class="text-sm text-gray-700">${item.name} x ${item.quantity} ($${item.price.toFixed(2)})</p>
+            `).join('');
 
+            return `
+                <div class="bg-white text-gray-800 rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                    <div class="flex justify-between items-center border-b pb-3 mb-3">
+                        <h3 class="text-xl font-bold text-blue-800">Order ID: #${order.id.substring(0, 8)}</h3>
+                        <span class="text-sm font-semibold text-green-600">${order.status || 'Delivered'}</span>
+                    </div>
+                    <div class="space-y-1 mb-4">
+                        <p class="text-gray-500 text-sm">Order Date: ${date}</p>
+                        ${itemsHtml}
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t">
+                        <span class="text-lg font-bold">Total: $${order.total.toFixed(2)}</span>
+                        <button class="text-sm bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-full transition-colors">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // NEW: Function to fetch and display orders
+        async function fetchAndDisplayOrders() {
+            if (!currentUserUid) {
+                showMessage("User not authenticated. Cannot load order history.", "error");
+                return;
+            }
+
+            ordersListContainer.innerHTML = ''; // Clear previous orders
+            emptyOrdersMessage.classList.remove('hidden'); // Show empty state by default
+
+            // Target the assumed 'orders' subcollection under the user's document
+            const ordersCollectionRef = collection(db, "users", currentUserUid, "orders");
+
+            try {
+                // Fetch all documents from the 'orders' subcollection
+                const querySnapshot = await getDocs(ordersCollectionRef);
+                
+                if (querySnapshot.empty) {
+                    console.log("No orders found.");
+                    // emptyOrdersMessage remains visible
+                    return;
+                }
+
+                emptyOrdersMessage.classList.add('hidden'); // Hide empty state
+                
+                querySnapshot.forEach((doc) => {
+                    const orderData = doc.data();
+                    // Assuming default values if data is missing for robust rendering
+                    const orderWithId = { 
+                        id: doc.id, 
+                        // Note: Firestore Timestamps need .toDate().toISOString() if not already a string, 
+                        // but we'll assume it's stored as a string for simplicity based on your current data type.
+                        date: orderData.date || new Date().toISOString(), 
+                        total: orderData.total || 0,
+                        status: orderData.status || 'Processing',
+                        items: orderData.items || [] // Must be an array of items for rendering
+                    };
+                    const orderCardHtml = createOrderCardHtml(orderWithId);
+                    ordersListContainer.insertAdjacentHTML('beforeend', orderCardHtml);
+                });
+
+                console.log("Order history loaded successfully.");
+            } catch (error) {
+                console.error("Error fetching order history:", error);
+                showMessage("Failed to load order history. Check Firestore rules or collection path.", "error");
+            }
+        }
+        
         async function fetchUserProfile(uid) {
             const docRef = doc(db, "users", uid);
             try {
@@ -868,21 +955,31 @@
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+
+                    // 1. Merge the existing userProfile (which holds the Auth email set in onAuthStateChanged)
+                    // with the Firestore data.
                     userProfile = {
-                        ...userProfile,
-                        ...data
+                        ...userProfile, // Contains authenticated email, and existing defaults
+                        ...data         // Overwrites fields with Firestore data
                     };
+
+                    // --- START OF FIX: Explicitly ensure the email from the live auth object is used ---
+                    if (auth.currentUser && auth.currentUser.email) {
+                         userProfile.email = auth.currentUser.email;
+                    }
+                    // --- END OF FIX ---
+
                     console.log("User profile loaded:", userProfile);
                     updateDisplayData();
                 } else {
                     console.log(`No user profile found for UID: ${uid}. Showing default data.`);
                     // If no profile exists for the signed-in user, use default data and prompt user to edit
                     showMessage("Your profile data is missing. Please use the edit button to create it.", "warning");
-                    updateDisplayData(); 
+                    updateDisplayData();
                 }
             } catch (error) {
                 console.error("Error fetching user profile:", error);
-                
+
                 // MODIFIED: Differentiate network errors from security/other errors
                 if (error.code === 'unavailable' || String(error).includes('offline')) {
                     showMessage("Failed to load profile. Please check your network connection.", "error");
@@ -909,6 +1006,7 @@
                 gender: Array.from(genderRadios).find(radio => radio.checked).value,
                 dob: {
                     date: dobDateSelect.value,
+                    // Get the month name from the selected option's text
                     month: dobMonthSelect.options[dobMonthSelect.selectedIndex].textContent,
                     year: dobYearSelect.value
                 },
@@ -940,7 +1038,7 @@
                 showMessage("Changes applied successfully!");
             } catch (error) {
                 console.error("Error writing document:", error);
-                
+
                 // MODIFIED: Differentiate network errors from security/other errors
                 if (error.code === 'unavailable' || String(error).includes('offline')) {
                     showMessage("Failed to save changes. Please check your network connection.", "error");
@@ -983,9 +1081,11 @@
             showSection(wishlistContent);
         });
 
+        // UPDATED: Order History link now calls fetchAndDisplayOrders
         orderHistoryLink.addEventListener('click', (event) => {
             event.preventDefault();
             showSection(orderHistoryContent);
+            fetchAndDisplayOrders(); // <-- New function call added
         });
 
         settingsLink.addEventListener('click', (event) => {
@@ -1066,6 +1166,9 @@
         }
 
         function populateFormFields() {
+            // FIX: Ensure DOB selects are populated before trying to set their values
+            populateDateOfBirth();
+            
             userNameInput.value = userProfile.name;
             userEmailInput.value = userProfile.email;
             userPhoneInput.value = userProfile.phone;
@@ -1075,11 +1178,16 @@
                     radio.checked = true;
                 }
             });
-            populateDateOfBirth();
+
+            // FIX/RETAIN: Correctly set DOB values using month name to index mapping
             dobDateSelect.value = userProfile.dob.date;
-            const monthIndex = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].indexOf(userProfile.dob.month);
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const monthIndex = months.indexOf(userProfile.dob.month);
             if (monthIndex > -1) {
+                // The value of the select option is 1-indexed (1 to 12)
                 dobMonthSelect.value = monthIndex + 1;
+            } else {
+                 dobMonthSelect.value = ''; // Reset to default "Month" if no match
             }
             dobYearSelect.value = userProfile.dob.year;
         }
@@ -1089,7 +1197,8 @@
             userEmailDisplay.textContent = userProfile.email;
             userPhoneDisplay.textContent = userProfile.phone;
             userAddressDisplay.textContent = userProfile.address;
-            userGenderDisplay.textContent = userProfile.gender.charAt(0).toUpperCase() + userProfile.gender.slice(1);
+            // Check for 'N/A' before capitalizing for better display
+            userGenderDisplay.textContent = userProfile.gender === "N/A" ? "N/A" : userProfile.gender.charAt(0).toUpperCase() + userProfile.gender.slice(1);
             userDobDisplay.textContent = `${userProfile.dob.date}, ${userProfile.dob.month}, ${userProfile.dob.year}`;
             profileImage.src = userProfile.image;
         }
@@ -1105,6 +1214,7 @@
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             months.forEach((month, index) => {
                 const option = document.createElement('option');
+                // Value is 1-indexed
                 option.value = index + 1;
                 option.textContent = month;
                 dobMonthSelect.appendChild(option);
@@ -1127,16 +1237,29 @@
             }, 3000);
         }
 
-        // Listen for authentication state changes
+        // Listen for authentication state changes (now requires pre-authentication)
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in. Get their secure UID.
                 currentUserUid = user.uid;
                 console.log("Authenticated with UID:", currentUserUid);
+
+                // --- START OF FIX: Initialize email from Firebase Auth user object ---
+                if (user.email) {
+                    // 1. Immediately update the read-only display.
+                    userEmailDisplay.textContent = user.email;
+
+                    // 2. Set the email in the local profile object.
+                    // This ensures it is retained if the Firestore profile is missing
+                    // or doesn't explicitly store the email.
+                    userProfile.email = user.email;
+                }
+                // --- END OF FIX ---
+
                 // Fetch the profile data for the securely obtained UID.
                 fetchUserProfile(currentUserUid);
             } else {
-                // MODIFIED: User is signed out. Show a warning or redirect to the login page.
+                // User is signed out. Display error and do not attempt to load profile.
                 console.log("User is signed out. Cannot load profile.");
                 showMessage("You are not signed in. Please log in to view your profile.", "error");
             }
@@ -1149,6 +1272,7 @@
         };
 
     </script>
+
 </body>
 
 </html>
