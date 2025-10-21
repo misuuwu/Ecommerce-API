@@ -61,10 +61,34 @@
                     Logged Out
                 </div>
 
-                <button class="text-white hover:text-red-danger transition-colors hidden md:block">
-                    <i class="fas fa-heart text-xl"></i>
-                </button>
+                <div class="relative" id="wishlist-container">
+                    <button id="wishlist-button" onclick="toggleWishlistPopover(event)" class="relative text-white hover:text-red-danger transition-colors">
+                        <i class="fas fa-heart text-xl"></i>
+                        </button>
 
+                    <div id="wishlist-popover"
+                        class="absolute right-0 mt-3 w-80 bg-light-bg rounded-xl shadow-2xl py-2 z-30 opacity-0 scale-95 pointer-events-none transition-all duration-200 origin-top-right border border-gray-100 max-h-96 overflow-y-auto">
+                        
+                        <div
+                            class="absolute right-3 -top-2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-white">
+                        </div>
+
+                        <div class="p-4 border-b">
+                            <h4 class="text-lg font-bold text-red-danger">Your Wishlist</h4>
+                        </div>
+                        
+                        <div id="wishlist-items-list" class="space-y-3 p-4">
+                            <p class="text-center text-text-muted text-sm">Your wishlist is empty.</p>
+                        </div>
+                        
+                        <div class="p-4 border-t">
+                            <button onclick="closeWishlistPopover()"
+                                class="w-full py-2 bg-primary-blue text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <button id="cart-button" class="relative text-white hover:text-accent-orange transition-colors">
                     <i class="fas fa-shopping-cart text-xl"></i>
                     <span id="cart-count"
@@ -178,7 +202,7 @@
         <footer class="mt-12 text-center text-text-muted text-sm border-t pt-4">
             <p>&copy; 2025 DigiSoria. All rights reserved.</p>
         </footer>
-        
+
     </div>
 
     <div id="backdrop"></div>
@@ -281,7 +305,7 @@
             </button>
         </div>
     </div>
-
+    
     <div id="product-detail-modal">
         <div
             class="modal-content bg-light-bg rounded-xl shadow-2xl w-11/12 max-w-5xl transform transition-all duration-300 p-0">
@@ -373,7 +397,7 @@
 
                     <div class="pt-2 border-t">
                         <h2 class="text-xl font-bold text-text-dark mb-2">Product Description</h2>
-                        <p id="detail-description-property" class="text-text-muted text-sm font-medium block mb-3">
+                        <p id="detail-description-property" class="text-sm text-text-muted font-medium block mb-3">
                             DIZCAYA PROPERTY</p>
                         <p id="detail-description"
                             class="text-text-muted leading-relaxed text-sm max-h-36 overflow-y-auto">
@@ -473,6 +497,7 @@
         const METRICS_DOC_ID = 'funnel_counts';
         let CURRENT_USER_ID = 'not-authenticated-user-placeholder';
         let isAuthResolved = false;
+        let ALL_PRODUCTS_CACHE = []; // NEW: Cache for all products
 
         const updateUserMetric = async (fieldName) => {
             if (CURRENT_USER_ID === 'not-authenticated-user-placeholder') {
@@ -495,7 +520,60 @@
         };
 
         // ===================================
-        // CART PERSISTENCE LOGIC (FIXED PROBLEM)
+        // WISHLIST PERSISTENCE LOGIC (UPDATED)
+        // ===================================
+
+        function getWishlistIds() {
+            // Wishlist is a simple array of product IDs stored in localStorage
+            const wishlist = localStorage.getItem('wishlist');
+            return wishlist ? JSON.parse(wishlist) : [];
+        }
+
+        function saveWishlistIds(ids) {
+            localStorage.setItem('wishlist', JSON.stringify(ids));
+        }
+        
+        // Helper function to get a product by ID from the cache
+        function getProductById(productId) {
+            return ALL_PRODUCTS_CACHE.find(p => p.id === productId.toString());
+        }
+
+        /**
+         * Toggles a product's presence in the local wishlist.
+         * @param {string} productId - The ID of the product to toggle.
+         */
+        const toggleWishlist = (productId) => {
+            productId = productId.toString();
+            let wishlistIds = getWishlistIds();
+            const index = wishlistIds.indexOf(productId);
+
+            if (index > -1) {
+                // Remove from wishlist
+                wishlistIds.splice(index, 1);
+                alert('Wishlist Updated', 'Product removed from your wishlist.', 'info');
+            } else {
+                // Add to wishlist
+                wishlistIds.push(productId);
+                alert('Wishlist Updated', 'Product added to your wishlist!', 'success');
+            }
+
+            saveWishlistIds(wishlistIds);
+            
+            // Re-render the currently displayed category to update the heart icon on cards
+            const activeCategoryButton = document.querySelector('.category-button.active');
+            if (activeCategoryButton) {
+                fetchProductsByCategory(activeCategoryButton.dataset.category);
+            }
+            
+            // Re-render the wishlist popover if it's open
+            if (wishlistPopover.classList.contains('open')) {
+                renderWishlistPopover();
+            }
+        };
+
+
+        // ===================================
+        // CART PERSISTENCE LOGIC
         // ===================================
         const CART_COLLECTION = 'carts';
         const CART_DOC_ID = 'currentCart';
@@ -558,7 +636,7 @@
 
 
         // ===================================
-        // AUTHENTICATION STATE MANAGEMENT - INTEGRATED WITH CART LOAD (FIXED)
+        // AUTHENTICATION STATE MANAGEMENT
         // ===================================
 
         const userIndicator = document.getElementById('user-indicator');
@@ -748,15 +826,21 @@
             if (cartDrawer.classList.contains('open')) {
                 renderCart();
             }
-            // Close filter menu if cart is opened
-            if (cartDrawer.classList.contains('open') && filterMenu.classList.contains('open')) {
+            // Close other elements
+            if (cartDrawer.classList.contains('open')) {
                 filterMenu.classList.remove('open');
-            }
-            // Close product detail modal if cart is opened
-            if (cartDrawer.classList.contains('open') && productDetailModal.classList.contains('open')) {
                 closeProductDetailModal();
+                closeWishlistPopover(); // Close popover
             }
         };
+
+        const closeCartDrawer = () => {
+            cartDrawer.classList.remove('open');
+            // Only remove backdrop if nothing else is open
+            if (!filterMenu.classList.contains('open') && !wishlistPopover.classList.contains('open')) {
+                backdrop.classList.remove('open');
+            }
+        }
 
         const updateQuantity = (index, action) => {
             // <<< CORE FIX: Gated function call
@@ -840,7 +924,120 @@
         };
 
         // ===================================
-        // NEW PRODUCT DETAIL MODAL LOGIC (FIX)
+        // WISHLIST POPOVER LOGIC (UPDATED)
+        // ===================================
+
+        const wishlistPopover = document.getElementById('wishlist-popover');
+        const wishlistItemsList = document.getElementById('wishlist-items-list');
+        const wishlistContainer = document.getElementById('wishlist-container');
+
+
+        const openWishlistPopover = () => {
+            wishlistPopover.classList.add('open', 'opacity-100', 'scale-100', 'pointer-events-auto');
+            wishlistPopover.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+            renderWishlistPopover();
+            
+            // Close other popovers/drawers
+            document.getElementById('profile-menu').classList.remove('open');
+            closeCartDrawer();
+            if (filterMenu.classList.contains('open')) {
+                toggleFilterMenu();
+            }
+            closeProductDetailModal();
+
+            // Add listener to close when clicking outside
+            document.addEventListener('click', closeWishlistPopoverOnClickOutside);
+        };
+
+        const closeWishlistPopover = () => {
+            wishlistPopover.classList.remove('open', 'opacity-100', 'scale-100', 'pointer-events-auto');
+            wishlistPopover.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+            document.removeEventListener('click', closeWishlistPopoverOnClickOutside);
+        };
+        
+        const closeWishlistPopoverOnClickOutside = (event) => {
+             // If click is outside the popover and outside the button, close the popover
+            if (!wishlistContainer.contains(event.target)) {
+                closeWishlistPopover();
+            }
+        };
+
+        const toggleWishlistPopover = (event) => {
+            event.stopPropagation(); // Prevent the click from immediately closing it via the window listener
+            if (wishlistPopover.classList.contains('open')) {
+                closeWishlistPopover();
+            } else {
+                openWishlistPopover();
+            }
+        };
+
+        const renderWishlistPopover = () => {
+            const wishlistIds = getWishlistIds();
+            
+            if (!wishlistItemsList) return;
+
+            wishlistItemsList.innerHTML = ''; // Clear existing items
+
+            const wishlistedProducts = ALL_PRODUCTS_CACHE.filter(p => wishlistIds.includes(p.id.toString()));
+
+            if (wishlistedProducts.length === 0) {
+                wishlistItemsList.innerHTML = '<p class="text-center text-text-muted py-4 text-sm">Your wishlist is empty. Start adding items!</p>';
+                return;
+            }
+
+            wishlistedProducts.forEach(product => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex items-center space-x-3 p-2 bg-white rounded-lg shadow-sm border border-gray-100';
+                itemDiv.innerHTML = `
+                    <img src="${(product.images && product.images[0]) || product.image || 'https://placehold.co/40x40/e2e8f0/64748b?text=Product'}" 
+                         alt="${product.name}" 
+                         class="w-10 h-10 object-cover rounded flex-shrink-0">
+                    <div class="flex-grow min-w-0">
+                        <h4 class="text-sm font-semibold text-text-dark truncate">${product.name}</h4>
+                        <p class="text-xs text-accent-orange font-bold">₱${parseFloat(product.price).toFixed(2)}</p>
+                    </div>
+                    <button class="add-to-cart-from-wishlist p-1 text-primary-blue hover:text-blue-600 transition-colors flex-shrink-0"
+                            data-product-id="${product.id}" title="Add to Cart">
+                        <i class="fas fa-cart-plus text-lg"></i>
+                    </button>
+                    <button class="remove-from-wishlist p-1 text-text-muted hover:text-red-danger transition-colors flex-shrink-0"
+                            data-product-id="${product.id}" title="Remove">
+                        <i class="fas fa-trash-alt text-base"></i>
+                    </button>
+                `;
+                wishlistItemsList.appendChild(itemDiv);
+            });
+            
+            // Attach listeners for buttons in the wishlist panel
+            document.querySelectorAll('.remove-from-wishlist').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stop propagation to prevent popover closing
+                    const productId = button.dataset.productId;
+                    toggleWishlist(productId); // This handles the removal and re-rendering
+                });
+            });
+
+            document.querySelectorAll('.add-to-cart-from-wishlist').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stop propagation to prevent popover closing
+                    const productId = button.dataset.productId;
+                    const product = getProductById(productId);
+                    if (product) {
+                        addToCart({
+                            id: product.id,
+                            name: product.name,
+                            price: parseFloat(product.price),
+                            image: (product.images && product.images[0]) || product.image
+                        });
+                        // Optional: remove from wishlist after adding to cart
+                        // toggleWishlist(productId); 
+                    }
+                });
+            });
+        };
+
+        // ===================================
+        // PRODUCT DETAIL MODAL LOGIC
         // ===================================
 
         const productDetailModal = document.getElementById('product-detail-modal');
@@ -877,7 +1074,38 @@
             // FIX 2: Populate all other fields from the product object
             detailPrice.textContent = `$${parseFloat(product.price || 0).toFixed(2)}`;
             detailDescription.textContent = product.description || 'No detailed description available.';
-            detailMainImage.src = product.image || 'https://placehold.co/600x600/e2e8f0/64748b?text=No+Image';
+
+            // --- START: Image Rendering Logic ---
+            const images = product.images || [product.image]; // Use images array, fall back to single image
+            const defaultImage = images[0] || 'https://placehold.co/600x600/e2e8f0/64748b?text=No+Image';
+            
+            detailMainImage.src = defaultImage;
+            
+            const detailThumbnails = document.getElementById('detail-thumbnails');
+            detailThumbnails.innerHTML = ''; // Clear previous thumbnails
+
+            images.forEach((imgUrl, index) => {
+                const isFirst = index === 0;
+                const thumbnailDiv = document.createElement('div');
+                thumbnailDiv.className = `w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg border-2 flex-shrink-0 cursor-pointer shadow-md ${isFirst ? 'border-primary-blue' : 'border-transparent'}`;
+                thumbnailDiv.innerHTML = `<img src="${imgUrl}" alt="Thumbnail ${index + 1}" class="w-full h-full object-cover rounded-lg p-1">`;
+                
+                thumbnailDiv.addEventListener('click', () => {
+                    // Update main image
+                    detailMainImage.src = imgUrl;
+                    // Update border to show active thumbnail
+                    detailThumbnails.querySelectorAll('div').forEach(thumb => {
+                        thumb.classList.remove('border-primary-blue');
+                        thumb.classList.add('border-transparent');
+                    });
+                    thumbnailDiv.classList.remove('border-transparent');
+                    thumbnailDiv.classList.add('border-primary-blue');
+                });
+                
+                detailThumbnails.appendChild(thumbnailDiv);
+            });
+            // --- END: Image Rendering Logic ---
+
 
             // Rating
             const ratingHtml = getRatingStars(product.rating || 0) +
@@ -970,13 +1198,11 @@
         const toggleFilterMenu = () => {
             filterMenu.classList.toggle('open');
             backdrop.classList.toggle('open');
-            // Close cart if filter menu is opened
-            if (filterMenu.classList.contains('open') && cartDrawer.classList.contains('open')) {
-                cartDrawer.classList.remove('open');
-            }
-            // Close product detail modal if filter menu is opened
-            if (filterMenu.classList.contains('open') && productDetailModal.classList.contains('open')) {
+            // Close other elements
+            if (filterMenu.classList.contains('open')) {
+                closeCartDrawer();
                 closeProductDetailModal();
+                closeWishlistPopover();
             }
         };
 
@@ -1170,8 +1396,7 @@
             }
 
             updateUserMetric('checkouts');
-            cartDrawer.classList.remove('open');
-            backdrop.classList.remove('open'); // Use generic backdrop
+            closeCartDrawer(); // Use the existing function to close the drawer correctly
 
             let merchandiseSubtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const totalPayment = merchandiseSubtotal + SHIPPING_SUBTOTAL;
@@ -1281,19 +1506,38 @@
 
         const featuredProductsGrid = document.getElementById('featured-products-grid');
 
+        /**
+         * Renders a single product card.
+         * @param {Object} product - The product data object.
+         */
         function renderProductCard(product) {
             const card = document.createElement('div');
             card.className =
-                'bg-light-bg rounded-xl shadow-lg overflow-hidden product-card hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col justify-between';
+                'bg-light-bg rounded-xl shadow-lg overflow-hidden product-card hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col justify-between relative'; // Added relative for heart button positioning
 
             const price = parseFloat(product.price || 0).toFixed(2);
             const rating = parseFloat(product.rating || 0).toFixed(1);
             const description = product.description || 'No description provided.';
-            const image = product.image || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
+            const productId = product.id; // Get the product ID
+            
+            // Use the first image in the array if it exists, otherwise fall back to a single image or placeholder
+            const image = (product.images && product.images[0]) || product.image || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
 
+            const wishlistIds = getWishlistIds();
+            const isWishlisted = wishlistIds.includes(productId.toString());
+            const heartClass = isWishlisted ? 'text-red-danger' : 'text-white/80 group-hover:text-red-danger';
+            
+            // NEW: Added Wishlist Button structure
             card.innerHTML = `
-                <div>
+                <div class="relative group">
                     <img src="${image}" alt="${product.name}" class="w-full h-48 object-cover">
+                    
+                    <button class="absolute top-3 right-3 p-2 bg-black/30 hover:bg-white rounded-full shadow-md z-10 toggle-wishlist transition-colors duration-200" 
+                            data-product-id="${productId}" 
+                            aria-label="Add to Wishlist">
+                        <i class="fas fa-heart ${heartClass} text-xl transition-colors duration-200"></i>
+                    </button>
+                    
                     <div class="p-4">
                         <h3 class="text-lg font-bold text-text-dark truncate">${product.name}</h3>
                         <div class="flex items-center text-amber-500 text-sm mb-1">
@@ -1305,7 +1549,7 @@
                     </div>
                 </div>
                 <div class="p-4 pt-0">
-                    <button class="add-to-cart-btn w-full px-4 py-2 bg-accent-orange text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2">
+                    <button class="add-to-cart-btn w-full px-4 py-2 bg-accent-orange text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2" data-id="${productId}">
                         <i class="fas fa-cart-plus"></i>
                         <span>Add to cart</span>
                     </button>
@@ -1314,8 +1558,8 @@
 
             // Add listener to open the product detail modal on card click
             card.addEventListener('click', (event) => {
-                // Only open the modal if the click target is NOT the Add to Cart button
-                if (!event.target.closest('.add-to-cart-btn')) {
+                // Only open the modal if the click target is NOT the Add to Cart or Wishlist button
+                if (!event.target.closest('.add-to-cart-btn') && !event.target.closest('.toggle-wishlist')) {
                     renderProductDetail(product);
                 }
             });
@@ -1326,7 +1570,7 @@
                 addToCartButton.addEventListener('click', (event) => {
                     event.stopPropagation();
                     addToCart({
-                        id: product.id || product.name,
+                        id: productId,
                         name: product.name,
                         price: parseFloat(price),
                         image: image
@@ -1336,9 +1580,20 @@
 
             featuredProductsGrid.appendChild(card);
         }
+        
+        // NEW: Attach listeners for the heart buttons
+        const attachWishlistListeners = () => {
+            document.querySelectorAll('.toggle-wishlist').forEach(button => {
+                button.onclick = (e) => {
+                    e.stopPropagation(); // Prevent the card click from opening the modal
+                    const productId = button.dataset.productId;
+                    toggleWishlist(productId);
+                };
+            });
+        };
 
         // ===================================
-        // PRODUCT FETCHING & CATEGORY LOGIC (UPDATED)
+        // PRODUCT FETCHING & CATEGORY LOGIC
         // ===================================
 
         const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
@@ -1362,6 +1617,8 @@
             // 3. Set up the new listener
             unsubscribeProducts = onSnapshot(productQuery, (querySnapshot) => {
                 featuredProductsGrid.innerHTML = '';
+                ALL_PRODUCTS_CACHE = []; // Clear and re-populate the cache
+
                 if (querySnapshot.empty) {
                     featuredProductsGrid.innerHTML =
                         '<p class="text-center text-text-muted col-span-full py-12">No products found in this category.</p>';
@@ -1370,8 +1627,13 @@
                 querySnapshot.forEach((doc) => {
                     const product = doc.data();
                     product.id = doc.id;
+                    ALL_PRODUCTS_CACHE.push(product); // Add to cache
                     renderProductCard(product);
                 });
+                
+                // NEW: Attach listeners for the heart buttons after rendering all cards
+                attachWishlistListeners();
+                
             }, (error) => {
                 console.error("Error fetching products:", error);
                 featuredProductsGrid.innerHTML =
@@ -1454,6 +1716,10 @@
                 profileButton.addEventListener('click', (event) => {
                     profileMenu.classList.toggle('open');
                     event.stopPropagation();
+                    // Close wishlist popover if profile menu opens
+                    if (profileMenu.classList.contains('open')) {
+                        closeWishlistPopover(); 
+                    }
                 });
                 window.addEventListener('click', (event) => {
                     if (!profileMenu.contains(event.target) && !profileButton.contains(event.target)) {
@@ -1496,11 +1762,12 @@
 
             // --- CART DRAWER EVENT LISTENERS ---
             document.getElementById('cart-button').addEventListener('click', toggleCartDrawer);
-            document.getElementById('close-cart-btn').addEventListener('click', toggleCartDrawer);
+            document.getElementById('close-cart-btn').addEventListener('click', closeCartDrawer);
+            
             // Updated backdrop to close either menu or cart
             backdrop.addEventListener('click', () => {
                 if (cartDrawer.classList.contains('open')) {
-                    toggleCartDrawer();
+                    closeCartDrawer();
                 } else if (filterMenu.classList.contains('open')) {
                     toggleFilterMenu();
                 }
@@ -1534,13 +1801,13 @@
             alertDiv.className =
                 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]';
             alertDiv.innerHTML = `
-                <div class="bg-white rounded-lg shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-100 duration-300">
+                <div class=\"bg-white rounded-lg shadow-2xl max-w-sm w-full mx-4 overflow-hidden transform transition-all scale-100 duration-300\">
                     <div class=\"${color} text-white p-4 text-xl font-bold\">${title}</div>
-                    <div class="p-6 text-text-dark">
+                    <div class=\"p-6 text-text-dark\">
                         <p>${message}</p>
                     </div>
-                    <div class="p-4 border-t flex justify-end">
-                        <button class="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors" onclick="this.closest('.fixed').remove()">
+                    <div class=\"p-4 border-t flex justify-end\">
+                        <button class=\"px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-600 transition-colors\" onclick=\"this.closest('.fixed').remove()\">
                             OK
                         </button>
                     </div>

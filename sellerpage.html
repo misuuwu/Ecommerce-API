@@ -78,12 +78,18 @@
             } else {
                 emptyMessage.classList.add('hidden');
                 products.forEach(product => {
-                    // Updated classes for a cleaner card to match the aesthetic
+                    // *** CHANGE 1: Use the first image in the 'images' array for the thumbnail ***
+                    // Fallback to a placeholder if 'images' is missing or empty, or if 'image' is present (for old products)
+                    const thumbnailUrl = Array.isArray(product.images) && product.images.length > 0
+                        ? product.images[0] 
+                        : product.image || 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=No+Image';
+
                     const productCard = document.createElement('div');
                     productCard.classList.add('bg-card-bg', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'flex-col', 'items-center', 'text-center', 'border', 'border-gray-100');
                     productCard.innerHTML = `
-                        <img src="${product.image || 'https://via.placeholder.com/400x300/e2e8f0/64748b?text=No+Image'}" alt="${product.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/e2e8f0/64748b?text=No+Image'" class="w-full h-48 object-cover rounded-md mb-4 shadow-sm">
+                        <img src="${thumbnailUrl}" alt="${product.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300/e2e8f0/64748b?text=No+Image'" class="w-full h-48 object-cover rounded-md mb-4 shadow-sm">
                         <h3 class="text-xl font-semibold mb-1 text-dark-text">${product.name}</h3>
+                        <p class="text-xs text-gray-500 mb-1">${product.category || 'Uncategorized'}</p>
                         <div class="flex items-center text-sm mb-1">${getRatingStars(product.rating)}<span class="ml-1 text-gray-500 text-xs">(${parseFloat(product.rating).toFixed(1)})</span></div>
                         <p class="text-sm text-gray-600 mb-2 max-h-20 overflow-hidden text-ellipsis">${product.description || 'No description provided.'}</p>
                         <p class="text-dark-text font-bold text-lg mb-4">$${parseFloat(product.price).toFixed(2)}</p>
@@ -96,6 +102,15 @@
                 });
             }
         };
+
+        // Helper to process the newline/comma-separated URLs into an array
+        const processImageUrls = (urlsString) => {
+            if (!urlsString) return [];
+            // Split by newline or comma, filter out empty strings, and trim whitespace
+            return urlsString.split(/[\n,]/)
+                             .map(url => url.trim())
+                             .filter(url => url.length > 0);
+        }
 
         // CRUD Operations
         const addProduct = async (product) => {
@@ -169,7 +184,11 @@
             const productPriceInput = document.getElementById('productPrice');
             const productDescriptionInput = document.getElementById('productDescription');
             const productRatingInput = document.getElementById('productRating');
-            const productImageInput = document.getElementById('productImage');
+            // *** CHANGE 2: Reference the new textarea for multiple images ***
+            const productImagesInput = document.getElementById('productImages'); 
+            // *** NEW CHANGE: Reference the new category input ***
+            const productCategoryInput = document.getElementById('productCategory'); 
+            
             const deleteModal = document.getElementById('deleteModal');
             const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
             const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
@@ -249,12 +268,21 @@
                     productPriceInput.value = product.price;
                     productDescriptionInput.value = product.description;
                     productRatingInput.value = product.rating;
-                    productImageInput.value = product.image;
+                    // *** NEW CHANGE: Set the category for editing ***
+                    productCategoryInput.value = product.category || 'Electronics'; 
+                    // *** CHANGE 3: Handle the 'images' array for editing. Join by newline for the textarea. ***
+                    const imagesString = Array.isArray(product.images) 
+                                         ? product.images.join('\n') 
+                                         : product.image || ''; // Fallback for old single-image products
+                    productImagesInput.value = imagesString;
                 } else {
                     modalTitle.textContent = 'Add New Product';
                     productForm.reset();
                     productIdInput.value = '';
                     productRatingInput.value = 5;
+                    productImagesInput.value = ''; // Ensure the images field is clear
+                    // *** NEW CHANGE: Set the default category for new products ***
+                    productCategoryInput.value = 'Electronics'; 
                 }
                 productModal.classList.remove('invisible', 'opacity-0');
                 productModal.classList.add('visible', 'opacity-100');
@@ -277,12 +305,21 @@
 
             productForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                // *** CHANGE 4: Use the helper to process the textarea value into an array ***
+                const imageURLs = processImageUrls(productImagesInput.value); 
+                
                 const product = {
                     name: productNameInput.value,
                     price: parseFloat(productPriceInput.value),
                     description: productDescriptionInput.value,
                     rating: parseFloat(productRatingInput.value),
-                    image: productImageInput.value,
+                    // *** NEW CHANGE: Include the selected category ***
+                    category: productCategoryInput.value, 
+                    // *** CHANGE 5: Store the array under the 'images' field (and remove the old 'image' field) ***
+                    images: imageURLs,
+                    // If you still need a single 'image' field for compatibility, you can add it, 
+                    // but the new render logic uses 'images' first.
+                    image: imageURLs.length > 0 ? imageURLs[0] : ''
                 };
 
                 if (productIdInput.value) {
@@ -362,6 +399,17 @@
                     <input type="text" id="productName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue" required>
                 </div>
                 <div class="mb-4">
+                    <label for="productCategory" class="block text-dark-text font-medium mb-2">Category</label>
+                    <select id="productCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue" required>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Appliances">Appliances</option>
+                        <option value="Outdoor">Outdoor</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Smart Home">Smart Home</option>
+                        <option value="Fitness">Fitness</option>
+                    </select>
+                </div>
+                <div class="mb-4">
                     <label for="productPrice" class="block text-dark-text font-medium mb-2">Price ($)</label>
                     <input type="number" id="productPrice" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue" required min="0.01" step="0.01">
                 </div>
@@ -374,10 +422,9 @@
                     <input type="number" id="productRating" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue" min="1" max="5" step="0.1" value="5">
                 </div>
                 <div class="mb-6">
-                    <label for="productImage" class="block text-dark-text font-medium mb-2">Image URL</label>
-                    <input type="text" id="productImage" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue">
+                    <label for="productImages" class="block text-dark-text font-medium mb-2">Image URLs (One per line or comma-separated)</label>
+                    <textarea id="productImages" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue" placeholder="e.g.&#10;https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
                 </div>
-                
                 <div class="flex justify-end gap-3">
                     <button type="button" id="closeModalBtn" class="px-6 py-2 border border-gray-300 text-dark-text rounded-lg hover:bg-gray-100 transition-colors duration-300 font-medium">
                         Cancel
