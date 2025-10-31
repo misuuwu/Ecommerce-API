@@ -1,8 +1,7 @@
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-    // NOTE: Imported 'doc' twice, corrected to use 'doc' from firestore imports
-    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    // NOTE: ADDED orderBy AND limit to the Firestore imports
+    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setLogLevel, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
     
     // Firebase global variables provided by the environment
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -24,9 +23,7 @@
     let auth;
     let productsCollection; // Private user product collection
     let publicProductsCollection; // Public collection for index.html
-    // **NEW**: Collection for user details lookup
     let usersCollection; 
-    // **NEW**: Collection for tracking orders/purchases
     let purchasesCollection; 
     let userId;
 
@@ -44,7 +41,7 @@
             starsHtml += `<span class="text-accent-yellow">½</span>`;
         }
         for (let i = 0; i < emptyStars; i++) {
-            starsHtml += `<span class="text-gray-300">★</span>`;
+            starsHtml += `<span class="text-gray-300">★`;
         }
         return starsHtml;
     };
@@ -300,8 +297,14 @@
                     console.error("Error fetching product data from Firestore:", error);
                 });
                 
-                // **NEW**: Setup the query for purchases/orders specific to the seller
-                const sellerPurchasesQuery = query(purchasesCollection, where('sellerId', '==', userId)); 
+                // **MODIFIED**: Setup the efficient query for purchases/orders specific to the seller.
+                // NOTE: This new query will trigger the SAME index error until the index is created.
+                const sellerPurchasesQuery = query(
+                    purchasesCollection, 
+                    where('sellerId', '==', userId),
+                    orderBy('timestamp', 'desc'), // Sort by date descending
+                    limit(5)                      // Only fetch the 5 most recent
+                ); 
                 
                 // **NEW**: Start real-time listener for the Purchases/Orders collection
                 onSnapshot(sellerPurchasesQuery, async (snapshot) => {
@@ -336,11 +339,11 @@
                     // Wait for all lookups to finish
                     await Promise.all(buyerLookups);
                     
-                    // Sort by timestamp (most recent first)
-                    purchases.sort((a, b) => {
-                        if (!a.timestamp || !b.timestamp) return 0;
-                        return b.timestamp.seconds - a.timestamp.seconds;
-                    });
+                    // The client-side sort is now REMOVED as the query sorts on the server
+                    // purchases.sort((a, b) => {
+                    //     if (!a.timestamp || !b.timestamp) return 0;
+                    //     return b.timestamp.seconds - a.timestamp.seconds;
+                    // });
 
                     // Render the recent buyers
                     renderRecentBuyers(purchases);
@@ -348,7 +351,7 @@
                     console.error("Error fetching purchase data from Firestore:", error);
                     if (recentBuyersContainer) {
                         recentBuyersContainer.innerHTML = 
-                            '<p class="text-center text-accent-red my-4 text-sm">Failed to load buyer data. Check Firestore rules/connection.</p>';
+                            '<p class="text-center text-accent-red my-4 text-sm">Failed to load buyer data. Check Firebase Console for index error.</p>';
                     }
                 });
 
