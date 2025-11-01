@@ -162,7 +162,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebas
         }
     };
 
-    // **CLEANUP/CONSISTENCY**: Ensure delete uses the scoped function if needed
+    // **CLEANUP/CONSISTENCY**
     const deleteProduct = async (id) => {
         try {
             // 1. Delete from the private user collection
@@ -207,13 +207,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebas
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const userIdDisplay = document.getElementById('userIdDisplay');
-        // **NOTE**: Renamed 'loadingIndicator' to 'loadingIndicatorProducts' to be specific
         const loadingIndicatorProducts = document.getElementById('loadingIndicatorProducts'); 
-        const recentBuyersContainer = document.getElementById('recentBuyersContainer'); // **NEW**
+        const recentBuyersContainer = document.getElementById('recentBuyersContainer'); 
 
         let productToDelete = null;
         
-        // Modal functions (Defined as const inside DOMContentLoaded to fix the 'already declared' error)
+        // Modal functions 
         const closeDeleteModal = () => {
             deleteModal.classList.remove('visible', 'opacity-100');
             deleteModal.classList.add('invisible', 'opacity-0');
@@ -297,13 +296,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebas
                     console.error("Error fetching product data from Firestore:", error);
                 });
                 
-                // **MODIFIED**: Setup the efficient query for purchases/orders specific to the seller.
-                // NOTE: This new query will trigger the SAME index error until the index is created.
+            
                 const sellerPurchasesQuery = query(
                     purchasesCollection, 
                     where('sellerId', '==', userId),
-                    orderBy('timestamp', 'desc'), // Sort by date descending
-                    limit(5)                      // Only fetch the 5 most recent
+                    orderBy('timestamp', 'desc'), 
+                    limit(5)                      
                 ); 
                 
                 // **NEW**: Start real-time listener for the Purchases/Orders collection
