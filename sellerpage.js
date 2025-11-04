@@ -21,8 +21,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebas
     
     let db;
     let auth;
-    let productsCollection; // Private user product collection
-    let publicProductsCollection; // Public collection for index.html
+    let productsCollection; 
+    let publicProductsCollection; 
     let usersCollection; 
     let purchasesCollection; 
     let userId;
@@ -337,12 +337,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebas
                     // Wait for all lookups to finish
                     await Promise.all(buyerLookups);
                     
-                    // The client-side sort is now REMOVED as the query sorts on the server
-                    // purchases.sort((a, b) => {
-                    //     if (!a.timestamp || !b.timestamp) return 0;
-                    //     return b.timestamp.seconds - a.timestamp.seconds;
-                    // });
-
+            
                     // Render the recent buyers
                     renderRecentBuyers(purchases);
                 }, (error) => {

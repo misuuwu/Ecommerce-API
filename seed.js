@@ -48,11 +48,7 @@ let CURRENT_PRODUCTS = [];
 // NEW: SHUFFLE FUNCTION
 // ===================================
 
-/**
- * Standard Fisher-Yates (Durstenfeld) shuffle algorithm.
- * @param {Array} array - The array to shuffle in place.
- * @returns {Array} - The shuffled array.
- */
+
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -179,10 +175,7 @@ const updateHeartIcons = () => {
     }
 };
 
-/**
- * Toggles a product's presence in the global wishlist array and saves to Firestore.
- * @param {string} productId - The ID of the product to toggle.
- */
+
 const toggleWishlist = (productId) => {
     productId = productId.toString();
     const index = wishlistIds.indexOf(productId);
@@ -884,10 +877,7 @@ const fetchUserProfile = async (userId) => {
     }
 };
 
-/**
- * Renders the Track Order screen with actual order details.
- * @param {Array<Object>} orderItems - The list of items purchased in the order.
- */
+
 const renderTrackOrderScreen = (orderItems) => {
     // Calculate totals
     const totalOrderAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -1278,7 +1268,7 @@ function loadRecommendedProducts() {
 
     // FIX APPLIED: Changed slice(2, 8) to slice(0, 6) to ensure we always try to render the first 6
     // products from the shuffled list, regardless of the list size.
-    const recommendedSet = ALL_PRODUCTS_CACHE.slice(0, 6);
+    const recommendedSet = ALL_PRODUCTS_CACHE.slice(0, 10);
 
     recommendedSet.forEach(product => {
         renderRecommendedCard(product); // Use the modified rendering function
@@ -1290,10 +1280,6 @@ function loadRecommendedProducts() {
 // END MODIFIED CODE for Recommended Products
 
 
-/**
- * Renders a single product card (for Featured Products section).
- * @param {Object} product - The product data object.
- */
 function renderProductCard(product) {
     const card = document.createElement('div');
     card.className =

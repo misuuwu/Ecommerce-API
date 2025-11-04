@@ -137,6 +137,15 @@
             color: white;
         }
 
+        /* NEW: Style for the order count */
+        .order-count {
+            color: #ff8c00;
+            /* Orange color for the count */
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-left: 1rem;
+        }
+
         .wishlist-item-card {
             display: flex;
             justify-content: space-between;
@@ -571,12 +580,13 @@
                 <div class="order-history-header">
                     <i class="fas fa-arrow-left"></i>
                     <h2>Order History</h2>
+                    <span id="order-count-display" class="order-count">(0 Orders)</span> 
                 </div>
 
                 <div id="orders-list-container" class="space-y-4">
                     </div>
 
-                <div id="empty-orders-message" class="empty-order-card">
+                <div id="empty-orders-message" class="empty-order-card hidden">
                     <span class="confused-emoji">😕</span>
                     <h2>You haven't placed any orders yet. Start shopping now!</h2>
                 </div>
@@ -745,15 +755,14 @@
                 <div class="settings-card">
                     <div class="card-header">
                         <i class="fas fa-home"></i>
-                        <h3>Shipping Address</h3>
+                        <h3>Primary Address</h3>
                     </div>
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex-grow">
-                            <h4 class="font-semibold text-lg">John Doe</h4>
-                            <p class="text-gray-600">123 Main Street</p>
-                            <p class="text-gray-600">Anytown, USA 12345</p>
+                            <h4 class="font-semibold text-lg" id="shipping-name-display">Loading Name...</h4>
+                            <p class="text-gray-600" id="shipping-address-display">Loading Address...</p>
                         </div>
-                        <button class="text-blue-600 hover:text-blue-700 font-semibold">EDIT</button>
+                        <button id="edit-shipping-address-btn" class="text-blue-600 hover:text-blue-700 font-semibold">EDIT</button>
                     </div>
                     <hr class="my-4">
                     <button
@@ -772,14 +781,14 @@
 <script type="module">
         // Corrected lines for profile.html
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        // UPDATED: Added collection and getDocs for Order History
+        // MODIFIED: Added collection and getDocs for Order History
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
         // Imports only necessary Auth functions (no signInAnonymously)
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
 
-        // UPDATED: Firebase Configuration with your new details
+        // Firebase Configuration with your new details
         const firebaseConfig = {
             apiKey: "AIzaSyAqDLocdi1CDHDeD5Z_LOlVZOycI2tuJpk",
             authDomain: "digisoria-baa83.firebaseapp.com",
@@ -853,6 +862,12 @@
         // NEW: DOM elements for Order History
         const ordersListContainer = document.getElementById('orders-list-container');
         const emptyOrdersMessage = document.getElementById('empty-orders-message');
+        // NEW: DOM element for Order Count
+        const orderCountDisplay = document.getElementById('order-count-display');
+
+        // NEW: DOM elements for Address Content (for the fix)
+        const shippingNameDisplay = document.getElementById('shipping-name-display');
+        const shippingAddressDisplay = document.getElementById('shipping-address-display');
 
         // Placeholder for user profile data
         let userProfile = {
@@ -872,6 +887,7 @@
         // NEW: Function to create HTML for a single order card
         function createOrderCardHtml(order) {
             // ASSUMPTION: The order object has 'id', 'date', 'total', and an 'items' array.
+            // Using a basic date conversion. Adjust if your Firestore Timestamps are different.
             const date = new Date(order.date).toLocaleDateString();
             
             // Create the list of items for the card body
@@ -900,15 +916,17 @@
         }
 
 
-        // NEW: Function to fetch and display orders
+        // UPDATED: Function to fetch and display orders with count logic
         async function fetchAndDisplayOrders() {
             if (!currentUserUid) {
                 showMessage("User not authenticated. Cannot load order history.", "error");
+                orderCountDisplay.textContent = '(0 Orders)'; 
                 return;
             }
 
             ordersListContainer.innerHTML = ''; // Clear previous orders
-            emptyOrdersMessage.classList.remove('hidden'); // Show empty state by default
+            orderCountDisplay.textContent = '(Loading...)'; // Show loading state
+            emptyOrdersMessage.classList.add('hidden'); // Hide empty state initially
 
             // Target the assumed 'orders' subcollection under the user's document
             const ordersCollectionRef = collection(db, "users", currentUserUid, "orders");
@@ -917,21 +935,27 @@
                 // Fetch all documents from the 'orders' subcollection
                 const querySnapshot = await getDocs(ordersCollectionRef);
                 
+                // --- START OF ORDER COUNT LOGIC ---
+                const orderCount = querySnapshot.size; // Get the number of orders
+
+                // Update the count display
+                orderCountDisplay.textContent = `(${orderCount} Order${orderCount !== 1 ? 's' : ''})`;
+                // --- END OF ORDER COUNT LOGIC ---
+
+
                 if (querySnapshot.empty) {
                     console.log("No orders found.");
-                    // emptyOrdersMessage remains visible
+                    emptyOrdersMessage.classList.remove('hidden'); // Show empty state
                     return;
                 }
 
-                emptyOrdersMessage.classList.add('hidden'); // Hide empty state
                 
                 querySnapshot.forEach((doc) => {
                     const orderData = doc.data();
                     // Assuming default values if data is missing for robust rendering
                     const orderWithId = { 
                         id: doc.id, 
-                        // Note: Firestore Timestamps need .toDate().toISOString() if not already a string, 
-                        // but we'll assume it's stored as a string for simplicity based on your current data type.
+                        // Note: If you use Firestore Timestamp, you may need to convert it: orderData.date.toDate().toISOString()
                         date: orderData.date || new Date().toISOString(), 
                         total: orderData.total || 0,
                         status: orderData.status || 'Processing',
@@ -945,6 +969,7 @@
             } catch (error) {
                 console.error("Error fetching order history:", error);
                 showMessage("Failed to load order history. Check Firestore rules or collection path.", "error");
+                orderCountDisplay.textContent = '(Error Loading)'; 
             }
         }
         
@@ -1081,7 +1106,7 @@
             showSection(wishlistContent);
         });
 
-        // UPDATED: Order History link now calls fetchAndDisplayOrders
+        // MODIFIED: Order History link now calls fetchAndDisplayOrders
         orderHistoryLink.addEventListener('click', (event) => {
             event.preventDefault();
             showSection(orderHistoryContent);
@@ -1111,6 +1136,8 @@
         addressLink.addEventListener('click', (event) => {
             event.preventDefault();
             showSection(addressContent);
+            // NEW: Update the address content when the section is shown
+            updateAddressContent();
         });
 
         banksBackLink.addEventListener('click', (event) => {
@@ -1201,6 +1228,16 @@
             userGenderDisplay.textContent = userProfile.gender === "N/A" ? "N/A" : userProfile.gender.charAt(0).toUpperCase() + userProfile.gender.slice(1);
             userDobDisplay.textContent = `${userProfile.dob.date}, ${userProfile.dob.month}, ${userProfile.dob.year}`;
             profileImage.src = userProfile.image;
+
+            // NEW: Update the Address Settings content from profile data
+            updateAddressContent();
+        }
+
+        // NEW FUNCTION: To update the data in the separate Address content section (Fix for Address button)
+        function updateAddressContent() {
+            // Assume the primary address stored in the userProfile is the 'Primary' address
+            shippingNameDisplay.textContent = userProfile.name;
+            shippingAddressDisplay.textContent = userProfile.address;
         }
 
         function populateDateOfBirth() {
