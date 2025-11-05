@@ -1,7 +1,10 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, setDoc, doc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, setDoc, doc, setLogLevel, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        
+        // Set Firestore log level to Debug for visibility in the console
+        setLogLevel('Debug');
 
         // --- GLOBAL VARIABLES & CONFIG ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -16,9 +19,19 @@
             appId: "1:1042609120554:web:0500a100e9ae42ead32a53",
             measurementId: "G-TM8CBPSRR9"
         };
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : defaultFirebaseConfig;
+        
+        let firebaseConfig;
+        
+        try {
+            // Attempt to parse the injected config, falling back to the default if not present
+            firebaseConfig = typeof __firebase_config !== 'undefined' 
+                ? JSON.parse(__firebase_config) 
+                : defaultFirebaseConfig;
+        } catch (e) {
+            console.error("Error parsing __firebase_config:", e);
+            firebaseConfig = defaultFirebaseConfig;
+        }
+
 
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -74,17 +87,25 @@
             }
         };
 
+        // Array of classes for non-own messages
+        const otherBubbleClasses = ['bubble-orange', 'bubble-green', 'bubble-teal'];
+
 
         const renderMessage = (message, isOwnMessage) => {
             // Container uses a column layout (flex-col) to stack the bubble and status vertically
-            // It aligns to the end (right) for own messages and start (left) for others.
             const containerClass = isOwnMessage
                 ? 'flex flex-col items-end'
                 : 'flex items-start';
 
-            const bubbleClass = isOwnMessage
-                ? 'bubble-own shadow-md'
-                : 'bubble-other shadow-sm';
+            let bubbleClass;
+            
+            if (isOwnMessage) {
+                bubbleClass = 'bubble-own shadow-md';
+            } else {
+                // Randomly select a class for the other user's message
+                const randomIndex = Math.floor(Math.random() * otherBubbleClasses.length);
+                bubbleClass = `${otherBubbleClasses[randomIndex]} shadow-md`;
+            }
             
             // Avatar (only show for the other user, on the left)
             const otherUserAvatarHtml = isOwnMessage 
@@ -119,7 +140,6 @@
                     ${currentUserAvatarHtml}
                 </div>
 
-                <!-- Status indicator placed below the message bubble -->
                 <div class="flex ${isOwnMessage ? 'justify-end' : 'justify-start'} w-full max-w-xs sm:max-w-sm mt-1 mb-2">
                     ${isOwnMessage ? statusHtml : ''}
                     ${!isOwnMessage ? statusHtml : ''}
@@ -167,28 +187,36 @@
         /**
          * Creates or updates a Firestore user profile document.
          */
-        const saveUserProfile = async (user) => {
+        const saveUserProfile = async (user, displayNameOverride = null) => {
             const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
             
-            // Generate a unique display name using part of the UID if no email/display name exists
+            // 1. Determine the base display name
             const defaultDisplayName = user.email ? user.email.split('@')[0] : `User-${user.uid.substring(0, 8)}`;
+            let finalDisplayName = displayNameOverride || defaultDisplayName;
+            
+            // 2. Remove the (Demo) suffix if it exists from previous runs
+            finalDisplayName = finalDisplayName.replace(/ \(Demo\)$/g, '').trim(); 
             
             const userData = {
                 uid: user.uid,
-                email: user.email,
-                displayName: defaultDisplayName, 
+                email: user.email || null,
+                displayName: finalDisplayName, 
                 createdAt: serverTimestamp(),
                 lastActive: serverTimestamp() 
             };
 
             try {
                 await setDoc(userDocRef, userData, { merge: true });
-                currentUserDisplayName = userData.displayName;
+                if (user.uid === currentUserId) {
+                    currentUserDisplayName = userData.displayName;
+                }
                 console.log("User profile saved/updated:", user.uid);
             } catch (e) {
                 console.error("Error saving user profile to Firestore:", e);
             }
         };
+        
+        // The createDemoUsersIfNecessary function has been removed.
 
         // --- CHAT & PRESENCE LOGIC ---
 
@@ -340,13 +368,17 @@
                     const userData = doc.data();
                     // Exclude the current user from the contact list
                     if (userData.uid !== currentUserId) {
+                        
+                        // IMPORTANT: Clean up the display name just in case it still has (Demo) from old entries
+                        userData.displayName = userData.displayName ? userData.displayName.replace(/ \(Demo\)$/g, '').trim() : `User-${userData.uid.substring(0, 8)}`;
+
                         users.push(userData);
                     }
                 });
 
                 userListContainer.innerHTML = '';
                 if (users.length === 0) {
-                     userListContainer.innerHTML = `<p class="p-4 text-center text-gray-500 text-sm">No other contacts found. Open another window to chat!</p>`;
+                     userListContainer.innerHTML = `<p class="p-4 text-center text-gray-500 text-sm">No other contacts found. Open another window to chat, or have another user log in to this app.</p>`;
                 } else {
                     users.forEach(user => {
                         userListContainer.appendChild(renderUserListItem(user));
@@ -360,6 +392,12 @@
 
 
         // --- FIREBASE INITIALIZATION & AUTHENTICATION HANDLERS ---
+        
+        const setAuthError = (message, isCritical = false) => {
+            authStatusMessage.textContent = message;
+            authStatusMessage.className = `mt-4 font-medium p-2 rounded ${isCritical ? 'text-red-700 bg-red-100' : 'text-yellow-700 bg-yellow-100'}`;
+            userInfoDisplay.textContent = 'Status: Disconnected';
+        };
 
         /**
          * Retries the initial Firebase sign-in with exponential backoff.
@@ -369,11 +407,12 @@
             const delay = Math.pow(2, retries) * 1000; // 1s, 2s, 4s, 8s, 16s
 
             if (retries > 0) {
-                authStatusMessage.textContent = `Retrying authentication in ${delay / 1000}s... (Attempt ${retries + 1}/${maxRetries})`;
+                authStatusMessage.textContent = `Authentication failed. Retrying in ${delay / 1000}s... (Attempt ${retries + 1}/${maxRetries})`;
+                authStatusMessage.className = `mt-4 font-medium text-yellow-700 bg-yellow-100 p-2 rounded`;
             }
 
             if (retries >= maxRetries) {
-                authStatusMessage.textContent = `Error: Authentication failed after ${maxRetries} attempts. Please refresh.`;
+                setAuthError("Error: Authentication failed after multiple attempts. Please refresh.", true);
                 console.error("Authentication failed: Max retries reached.");
                 return;
             }
@@ -395,8 +434,8 @@
 
 
         const initializeFirebase = async () => {
-            if (!firebaseConfig || !firebaseConfig.apiKey) {
-                userInfoDisplay.textContent = 'Error: Firebase config missing.';
+            if (!firebaseConfig || firebaseConfig.apiKey === "PLACEHOLDER_API_KEY") {
+                setAuthError("Error: Firebase configuration is missing or invalid. Check the setup.", true);
                 return;
             }
 
@@ -405,14 +444,15 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                authStatusMessage.textContent = 'Waiting for authentication...';
-                authStatusMessage.classList.remove('hidden-auth');
+                authStatusMessage.textContent = 'Authenticating...';
+                authStatusMessage.className = `mt-4 font-medium text-gray-700 bg-gray-100 p-2 rounded`;
                 sendButton.disabled = true;
 
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUserId = user.uid;
-                        // Save profile and get display name
+                        
+                        // Save profile and get display name for the current user
                         await saveUserProfile(user); 
                         
                         // Update UI to show logged-in status
@@ -420,7 +460,14 @@
                         
                         isAuthReady = true;
                         sendButton.disabled = false;
-                        authStatusMessage.classList.add('hidden-auth');
+                        
+                        // Hide the status message on success
+                        authStatusMessage.textContent = 'Authenticated successfully.';
+                        authStatusMessage.className = `mt-4 font-medium text-green-700 bg-green-100 p-2 rounded`;
+                        setTimeout(() => {
+                            authStatusMessage.textContent = '';
+                            authStatusMessage.className = `mt-4 font-medium`;
+                        }, 3000);
                         
                         // Start listening for other users
                         setupUserListListener();
@@ -444,7 +491,7 @@
                 });
             } catch (error) {
                 console.error("Firebase Initialization Error:", error);
-                userInfoDisplay.textContent = `Error: Failed to initialize Firebase.`;
+                setAuthError(`Critical Error during Initialization: ${error.message}.`, true);
             }
         };
         
@@ -481,6 +528,15 @@
                 sendButton.disabled = false;
             }
         });
+        
+        // Enable/disable send button based on input value
+        messageInput.addEventListener('input', () => {
+            if (isAuthReady) {
+                sendButton.disabled = messageInput.value.trim() === '';
+            }
+        });
 
         // Initialize the application on page load
         initializeFirebase();
+
+   

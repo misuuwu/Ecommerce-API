@@ -1,0 +1,83 @@
+
+        /* Set Inter font */
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Custom scrollbar for message display area */
+        #messages-container::-webkit-scrollbar, #user-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #messages-container::-webkit-scrollbar-thumb, #user-list-container::-webkit-scrollbar-thumb {
+            background-color: #9ca3af; /* gray-400 */
+            border-radius: 4px;
+        }
+        #messages-container::-webkit-scrollbar-track, #user-list-container::-webkit-scrollbar-track {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        
+        /* Utility class to hide elements */
+        .hidden-auth {
+            display: none !important;
+        }
+
+        /* --- Custom Styles for the Clean Chat Theme --- */
+
+        /* Header Bar (Dark Blue) */
+        .main-header-bg {
+            background-color: #0033A0; /* Darker, deep blue */
+            color: white;
+        }
+        
+        /* Own Message Bubble (Right Side - Consistent Blue) */
+        .bubble-own {
+            background-color: #007bff; /* Primary Blue */
+            color: white;
+            border-radius: 1rem 0.5rem 1rem 1rem; 
+            position: relative;
+        }
+        
+        /* Other Message Bubble Styles (randomly assigned colors - white text for high contrast) */
+        .bubble-orange {
+            background-color: #ff9900; /* Vibrant Orange */
+            color: white;
+            border-radius: 0.5rem 1rem 1rem 1rem; 
+            position: relative;
+        }
+        .bubble-green {
+            background-color: #28a745; /* Success Green */
+            color: white;
+            border-radius: 0.5rem 1rem 1rem 1rem; 
+            position: relative;
+        }
+        .bubble-teal {
+            background-color: #17a2b8; /* Info Teal Blue */
+            color: white;
+            border-radius: 0.5rem 1rem 1rem 1rem; 
+            position: relative;
+        }
+        
+        /* Avatar placeholder (Circular gray) */
+        .avatar-placeholder {
+            width: 30px;
+            height: 30px;
+            background-color: #bdbdbd; 
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Status indicator styles (used for "sent" / "seen") */
+        .status-indicator {
+            font-size: 10px;
+            color: #6b7280; 
+            display: flex;
+            align-items: center;
+            margin-top: 1px;
+            margin-left: 2px;
+            margin-right: 2px;
+        }
+
+        .status-indicator .fa-check-circle {
+            color: #007bff; /* Blue checkmark */
+            font-size: 11px;
+            margin-right: 2px;
+        }
+
