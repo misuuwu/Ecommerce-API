@@ -1388,8 +1388,8 @@ const fetchProductsByCategory = (category) => {
     // 3. Set up the new listener
     unsubscribeProducts = onSnapshot(productQuery, (querySnapshot) => {
         featuredProductsGrid.innerHTML = '';
-        ALL_PRODUCTS_CACHE = []; // Clear and re-populate the cache
-        CURRENT_PRODUCTS = []; // Clear the current products list
+        ALL_PRODUCTS_CACHE = []; 
+        CURRENT_PRODUCTS = []; 
 
         if (querySnapshot.empty) {
             featuredProductsGrid.innerHTML =
