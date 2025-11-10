@@ -781,10 +781,8 @@
 <script type="module">
         // Corrected lines for profile.html
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        // MODIFIED: Added collection and getDocs for Order History
         import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
-        // Imports only necessary Auth functions (no signInAnonymously)
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
 
@@ -886,8 +884,6 @@
 
         // NEW: Function to create HTML for a single order card
         function createOrderCardHtml(order) {
-            // ASSUMPTION: The order object has 'id', 'date', 'total', and an 'items' array.
-            // Using a basic date conversion. Adjust if your Firestore Timestamps are different.
             const date = new Date(order.date).toLocaleDateString();
             
             // Create the list of items for the card body
@@ -924,9 +920,9 @@
                 return;
             }
 
-            ordersListContainer.innerHTML = ''; // Clear previous orders
-            orderCountDisplay.textContent = '(Loading...)'; // Show loading state
-            emptyOrdersMessage.classList.add('hidden'); // Hide empty state initially
+            ordersListContainer.innerHTML = ''; 
+            orderCountDisplay.textContent = '(Loading...)'; 
+            emptyOrdersMessage.classList.add('hidden'); 
 
             // Target the assumed 'orders' subcollection under the user's document
             const ordersCollectionRef = collection(db, "users", currentUserUid, "orders");
