@@ -63,7 +63,7 @@
                 </a>
             </div>
 
-            <p class="mt-4 text-sm text-center"><a href="#"
+            <p class="mt-4 text-sm text-center"><a href="#" id="forgotPasswordLink"
                     class="underline text-orange-400 hover:text-orange-300 transition-colors">Forgot Password? Click
                     here to reset</a></p>
         </div>
@@ -143,11 +143,10 @@
             onAuthStateChanged,
             createUserWithEmailAndPassword,
             signOut,
-            // --- NEW IMPORTS FOR SOCIAL LOGIN ---
             signInWithPopup,
             GoogleAuthProvider,
-            FacebookAuthProvider
-            // --- END NEW IMPORTS ---
+            FacebookAuthProvider,
+            sendPasswordResetEmail // NEW IMPORT
         } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
         // --- Firebase Configuration Placeholder ---
@@ -164,13 +163,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // --- NEW: SOCIAL LOGIN PROVIDER INSTANCES ---
         const googleProvider = new GoogleAuthProvider();
         const facebookProvider = new FacebookAuthProvider();
         // ---------------------------------------------
 
 
-        // REVISED: showMessage function to use simple opacity transition
         function showMessage(text, type = 'info') {
             const messageBox = document.getElementById('messageBox');
             messageBox.textContent = text;
@@ -178,7 +175,6 @@
             if (type === 'success') colorClass = 'bg-green-600';
             else if (type === 'error') colorClass = 'bg-red-600';
 
-            // Remove previous color classes and add 'show'
             messageBox.className = 'message-box ' + colorClass;
             messageBox.classList.add('show');
 
@@ -187,7 +183,6 @@
             }, 3000);
         }
 
-        // Function to toggle password visibility (restored)
         window.togglePasswordVisibility = function (fieldId) {
             const field = document.getElementById(fieldId);
             const toggleIcon = document.getElementById(fieldId + '-toggle');
@@ -204,9 +199,7 @@
         };
 
 
-        // --- NEW: GENERIC HANDLER FOR SOCIAL SIGN-IN/SIGN-UP ---
         async function handleSocialSignIn(provider, actionType = 'Login') {
-            // provider.providerId will be "google.com" or "facebook.com"
             showMessage(`Attempting ${actionType} with ${provider.providerId.replace('.com', '')}...`, 'info');
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -214,7 +207,6 @@
 
                 showMessage(`${actionType} successful! Welcome, ${user.displayName || user.email}. Redirecting...`, 'success');
 
-                // Redirect on successful sign-in
                 setTimeout(() => {
                     window.location.replace('seed.html');
                 }, 1000);
@@ -234,11 +226,34 @@
                 showMessage(errorMessage, 'error');
             }
         }
-        // --------------------------------------------------------
+        
+        // --- NEW: PASSWORD RESET IMPLEMENTATION ---
+        async function handlePasswordReset() {
+            const email = document.getElementById('loginEmail').value;
+
+            if (!email) {
+                showMessage("Please enter your email in the 'Email' field above before clicking 'Forgot Password'.", 'error');
+                return;
+            }
+
+            showMessage(`Sending password reset email to ${email}...`, 'info');
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessage("Password reset email sent! Check your inbox (and spam folder) to continue.", 'success');
+            } catch (error) {
+                console.error("Password Reset Error:", error.code, error.message);
+                let errorMessage = "Failed to send reset email. Please ensure the email is correct and registered.";
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = "No account found for this email. Please check the address.";
+                }
+                showMessage(errorMessage, 'error');
+            }
+        }
+        // ------------------------------------------
 
 
         document.addEventListener('DOMContentLoaded', () => {
-            // --- ELEMENT REFERENCES ---
             const loginContainer = document.getElementById('loginForm');
             const signupContainer = document.getElementById('signupForm');
             const showSignupLink = document.getElementById('showSignup');
@@ -248,27 +263,20 @@
             const loginEmailInput = document.getElementById('loginEmail');
             const loginPasswordInput = document.getElementById('loginPassword');
 
-
-            // --- NEW: SOCIAL BUTTON REFERENCES (Login) ---
             const googleSignInBtn = document.getElementById('googleSignInBtn');
             const facebookSignInBtn = document.getElementById('facebookSignInBtn');
-            // --- NEW: SOCIAL BUTTON REFERENCES (Signup) ---
             const googleSignUpBtn = document.getElementById('googleSignUpBtn');
             const facebookSignUpBtn = document.getElementById('facebookSignUpBtn');
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink'); // NEW REFERENCE
 
 
-            // --- FORM SWITCHING LOGIC (SIMPLE OPACITY TRANSITION) ---
             function switchForm(showForm, hideForm) {
-                // Hide the current form
                 hideForm.classList.remove('visible');
                 hideForm.classList.add('hidden');
-
-                // Show the target form
                 showForm.classList.remove('hidden');
                 showForm.classList.add('visible');
             }
 
-            // Event listeners for form switching
             if (showSignupLink) {
                 showSignupLink.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -282,12 +290,10 @@
                     switchForm(loginContainer, signupContainer);
                 });
             }
-            // --- END FORM SWITCHING LOGIC ---
 
 
-            // --- FIREBASE LOGIN/AUTH LOGIC ---
             onAuthStateChanged(auth, (user) => {
-                // Logic removed to prevent auto-redirect on page load.
+                // ...
             });
 
             if (loginForm) {
@@ -325,7 +331,6 @@
             }
 
 
-            // --- NEW: SOCIAL LOGIN LISTENERS (Using Login action) ---
             if (googleSignInBtn) {
                 googleSignInBtn.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -338,10 +343,17 @@
                     handleSocialSignIn(facebookProvider, 'Login');
                 });
             }
-            // ---------------------------------------------------------
+
+            // --- NEW: FORGOT PASSWORD LISTENER ---
+            if (forgotPasswordLink) {
+                forgotPasswordLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handlePasswordReset();
+                });
+            }
+            // -------------------------------------
 
 
-            // --- SIGNUP FORM SUBMISSION (MODIFIED LOGIC) ---
             const signupFormElement = document.getElementById('signup');
             if (signupFormElement) {
                 signupFormElement.addEventListener('submit', async (e) => {
@@ -349,13 +361,13 @@
                     const email = document.getElementById('signupEmail').value;
                     const password = document.getElementById('signupPassword').value;
                     const confirmPassword = document.getElementById('signupConfirmPassword').value;
-                    const termsChecked = document.getElementById('terms').checked; // Check terms
+                    const termsChecked = document.getElementById('terms').checked;
 
                     if (password !== confirmPassword) {
                         showMessage("Passwords do not match.", 'error');
                         return;
                     }
-                    if (!termsChecked) { // Check if terms and conditions are accepted
+                    if (!termsChecked) {
                         showMessage("Please accept the Terms and Conditions.", 'error');
                         return;
                     }
@@ -363,15 +375,12 @@
                     showMessage("Attempting signup...", 'info');
 
                     try {
-                        // Attempt Firebase Signup
                         await createUserWithEmailAndPassword(auth, email, password);
                         
-                        // Force sign out the newly created user to prevent auto-redirect
                         await signOut(auth);
                         
                         showMessage("Signup successful! Please log in with your new account.", 'success');
                         
-                        // Automatically switch to the login form after successful signup
                         switchForm(loginContainer, signupContainer);
                     } catch (error) {
                         console.error("Firebase Signup Error:", error.code, error.message);
@@ -386,20 +395,18 @@
                 });
             }
 
-            // --- NEW: SOCIAL SIGNUP LISTENERS (Using Signup action) ---
             if (googleSignUpBtn) {
                 googleSignUpBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    handleSocialSignIn(googleProvider, 'Signup'); // Pass 'Signup' action
+                    handleSocialSignIn(googleProvider, 'Signup');
                 });
             }
             if (facebookSignUpBtn) {
                 facebookSignUpBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    handleSocialSignIn(facebookProvider, 'Signup'); // Pass 'Signup' action
+                    handleSocialSignIn(facebookProvider, 'Signup');
                 });
             }
-            // ---------------------------------------------------------
         });
     </script>
 
