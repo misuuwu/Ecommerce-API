@@ -184,6 +184,12 @@
         .rating .fas {
             color: #ff8c00;
         }
+        
+        /* NEW: Empty star style for accurate rating rendering */
+        .rating .far {
+            color: #ff8c00;
+            opacity: 0.3;
+        }
 
         .product-price {
             color: #ef4444;
@@ -533,46 +539,13 @@
                     <i class="fas fa-arrow-left"></i>
                     <h2>User's Fave</h2>
                 </div>
-                <div class="wishlist-item-card">
-                    <div class="item-info">
-                        <span class="stock-status">In stock</span>
-                        <h3 class="product-name">Product Name</h3>
-                        <div class="rating">
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star-half-alt filled"></i>
-                        </div>
-                        <span class="product-price">Price</span>
+                
+                <div id="wishlist-list-container" class="space-y-4">
                     </div>
-                    <div class="item-actions">
-                        <button class="add-to-cart-btn">ADD TO CART</button>
-                        <button class="delete-btn">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
 
-                <div class="wishlist-item-card">
-                    <div class="item-info">
-                        <span class="stock-status">In stock</span>
-                        <h3 class="product-name">Product Name</h3>
-                        <div class="rating">
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star-half-alt filled"></i>
-                        </div>
-                        <span class="product-price">Price</span>
-                    </div>
-                    <div class="item-actions">
-                        <button class="add-to-cart-btn">ADD TO CART</button>
-                        <button class="delete-btn">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
+                <div id="empty-wishlist-message" class="empty-order-card hidden">
+                    <span class="confused-emoji">✨</span>
+                    <h2>Your wishlist is empty! Find your new favorite items now.</h2>
                 </div>
             </main>
 
@@ -781,7 +754,8 @@
 <script type="module">
         // Corrected lines for profile.html
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+        // UPDATED IMPORTS: Added deleteDoc and addDoc for wishlist actions
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
@@ -857,11 +831,14 @@
         const notificationsBackLink = document.getElementById('notifications-back-link');
         const addressBackLink = document.getElementById('address-back-link');
 
-        // NEW: DOM elements for Order History
+        // DOM elements for Order History
         const ordersListContainer = document.getElementById('orders-list-container');
         const emptyOrdersMessage = document.getElementById('empty-orders-message');
-        // NEW: DOM element for Order Count
         const orderCountDisplay = document.getElementById('order-count-display');
+
+        // NEW: DOM elements for Wishlist
+        const wishlistListContainer = document.getElementById('wishlist-list-container');
+        const emptyWishlistMessage = document.getElementById('empty-wishlist-message');
 
         // NEW: DOM elements for Address Content (for the fix)
         const shippingNameDisplay = document.getElementById('shipping-name-display');
@@ -881,6 +858,151 @@
             },
             image: "https://placehold.co/200x200/cccccc/333333?text=Profile"
         };
+
+
+        // NEW: Helper function to generate star icons based on rating
+        function getRatingStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    stars += '<i class="fas fa-star filled"></i>';
+                } else if (i === fullStars && hasHalfStar) {
+                    stars += '<i class="fas fa-star-half-alt filled"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>'; // Use 'far' for empty star
+                }
+            }
+            return stars;
+        }
+
+
+        // NEW: Function to create HTML for a single wishlist item card
+        function createWishlistItemHtml(item) {
+            // Assuming default values for robust rendering
+            const inStock = item.stockStatus === 'In stock' || item.stockStatus === 'In Stock';
+            const stockClass = inStock ? 'text-green-500' : 'text-red-500';
+            const stockText = inStock ? 'In stock' : 'Out of stock';
+            const price = item.price ? `$${parseFloat(item.price).toFixed(2)}` : 'N/A';
+            const ratingHtml = getRatingStars(item.rating || 0);
+
+            return `
+                <div class="wishlist-item-card">
+                    <div class="item-info">
+                        <span class="stock-status ${stockClass}">${stockText}</span>
+                        <h3 class="product-name">${item.name || 'Product Name'}</h3>
+                        <div class="rating">
+                            ${ratingHtml}
+                        </div>
+                        <span class="product-price">${price}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="add-to-cart-btn" data-product-id="${item.id}">ADD TO CART</button>
+                        <button class="delete-btn" data-product-id="${item.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // NEW: Function to handle 'Delete' and 'Add to Cart' actions
+        async function handleWishlistAction(productId, actionType) {
+            if (!currentUserUid) {
+                showMessage("User not authenticated. Please log in.", "error");
+                return;
+            }
+
+            const itemRef = doc(db, "users", currentUserUid, "wishlist", productId);
+            let success = false;
+
+            try {
+                if (actionType === 'delete') {
+                    // Action 1: Delete from Wishlist
+                    await deleteDoc(itemRef);
+                    showMessage("Item successfully removed from wishlist!");
+                    success = true;
+                } else if (actionType === 'add-to-cart') {
+                    // Action 2: Move to Cart
+                    
+                    // 1. Fetch the item data first to get name/price
+                    const itemSnap = await getDoc(itemRef);
+                    if (!itemSnap.exists()) {
+                         showMessage("Error: Wishlist item not found.", "error");
+                         return;
+                    }
+                    const itemData = itemSnap.data();
+
+                    // 2. Add item to the 'cart' subcollection 
+                    // Note: In a real app, you might want to check if the item already exists in the cart.
+                    const cartCollectionRef = collection(db, "users", currentUserUid, "cart");
+                    await addDoc(cartCollectionRef, {
+                        productId: productId,
+                        name: itemData.name,
+                        price: itemData.price,
+                        quantity: 1, // Default to 1 item
+                        addedAt: new Date().toISOString()
+                    });
+
+                    // 3. Remove the item from the wishlist afterwards
+                    await deleteDoc(itemRef);
+                    showMessage("Item moved to cart and removed from wishlist!");
+                    success = true;
+                }
+            } catch (error) {
+                console.error(`Error performing ${actionType} action:`, error);
+                showMessage(`Failed to perform ${actionType} action. Check Firestore rules.`, "error");
+            }
+
+            // Refresh the wishlist view if the action was successful
+            if (success) {
+                fetchAndDisplayWishlist();
+            }
+        }
+
+
+        // NEW: Function to fetch and display wishlist
+        async function fetchAndDisplayWishlist() {
+            if (!currentUserUid) {
+                showMessage("User not authenticated. Cannot load wishlist.", "error");
+                return;
+            }
+
+            wishlistListContainer.innerHTML = ''; 
+            emptyWishlistMessage.classList.add('hidden'); 
+
+            // Target the assumed 'wishlist' subcollection under the user's document
+            const wishlistCollectionRef = collection(db, "users", currentUserUid, "wishlist");
+
+            try {
+                const querySnapshot = await getDocs(wishlistCollectionRef);
+                
+                if (querySnapshot.empty) {
+                    console.log("No wishlist items found.");
+                    emptyWishlistMessage.classList.remove('hidden'); // Show empty state
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const itemData = doc.data();
+                    const wishlistItem = { 
+                        id: doc.id, 
+                        // Spread all other data (name, price, rating, stockStatus)
+                        ...itemData 
+                    };
+                    const itemCardHtml = createWishlistItemHtml(wishlistItem);
+                    wishlistListContainer.insertAdjacentHTML('beforeend', itemCardHtml);
+                });
+
+                console.log("Wishlist loaded successfully.");
+            } catch (error) {
+                console.error("Error fetching wishlist:", error);
+                showMessage("Failed to load wishlist. Check Firestore rules or collection path.", "error");
+            }
+        }
+
 
         // NEW: Function to create HTML for a single order card
         function createOrderCardHtml(order) {
@@ -1097,16 +1219,18 @@
             showSection(profileContent);
         });
 
+        // MODIFIED: Wishlist link now calls fetchAndDisplayWishlist
         wishlistLink.addEventListener('click', (event) => {
             event.preventDefault();
             showSection(wishlistContent);
+            fetchAndDisplayWishlist(); 
         });
 
         // MODIFIED: Order History link now calls fetchAndDisplayOrders
         orderHistoryLink.addEventListener('click', (event) => {
             event.preventDefault();
             showSection(orderHistoryContent);
-            fetchAndDisplayOrders(); // <-- New function call added
+            fetchAndDisplayOrders(); 
         });
 
         settingsLink.addEventListener('click', (event) => {
@@ -1172,6 +1296,24 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // NEW: Event Delegation for Wishlist Buttons
+        wishlistListContainer.addEventListener('click', (event) => {
+            const clickedButton = event.target.closest('button');
+
+            if (clickedButton) {
+                const productId = clickedButton.dataset.productId;
+                
+                if (clickedButton.classList.contains('delete-btn')) {
+                    // Action 1: Delete
+                    handleWishlistAction(productId, 'delete');
+                } else if (clickedButton.classList.contains('add-to-cart-btn')) {
+                    // Action 2: Add to Cart (and remove from wishlist)
+                    handleWishlistAction(productId, 'add-to-cart');
+                }
+            }
+        });
+
 
         function toggleEditMode(isEditing) {
             if (isEditing) {

@@ -8,153 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #4b6cb7;
-            background-image: linear-gradient(135deg, #182848, #4b6cb7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* REVISED: Clean, centered single-column glass container */
-        .auth-container {
-            background: rgba(255, 255, 255, 0.15);
-            /* Slightly less opaque white */
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            /* The signature glass border */
-            padding: 3rem 2.5rem;
-            /* Balanced padding */
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            max-width: 450px;
-            /* Standard width for a single form */
-            width: 90%;
-            color: white;
-            text-align: center;
-            position: relative;
-            /* REMOVED: All height transitions from CSS */
-        }
-
-        /* Forms must now occupy the same space and switch visibility */
-        .form-container {
-            transition: opacity 0.4s ease-in-out;
-            width: 100%;
-            position: relative;
-            padding: 0;
-        }
-
-        .form-container.visible {
-            opacity: 1;
-            position: relative;
-            z-index: 2;
-            pointer-events: auto;
-        }
-
-        /* The hidden form must be positioned exactly over the visible one to transition smoothly */
-        .form-container.hidden {
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        /* REVISED: Input to match the semi-transparent glass style of the screenshot */
-        .input-group input,
-        input[type="email"],
-        input[type="text"] {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            /* Semi-transparent border */
-            padding: 0.75rem 3rem 0.75rem 1rem;
-            border-radius: 0.75rem;
-            width: 100%;
-            color: white;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input:focus,
-        input[type="email"]:focus,
-        input[type="text"]:focus {
-            background: rgba(255, 255, 255, 0.35);
-            /* Slightly brighter on focus */
-            border-color: white;
-            /* Solid white border on focus */
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-        }
-
-        .input-group input::placeholder,
-        input[type="email"]::placeholder,
-        input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .input-group i {
-            position: absolute;
-            top: 50%;
-            right: 1rem;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-        }
-
-        /* REVISED: Social Buttons to match the semi-transparent style */
-        .social-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            color: white;
-            font-weight: 600;
-        }
-
-        .social-btn:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        .social-btn i {
-            margin-right: 0.75rem;
-        }
-
-        /* Message box cleanup */
-        .message-box {
-            position: fixed;
-            top: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            z-index: 1000;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        .message-box.show {
-            opacity: 1;
-            visibility: visible;
-        }
-    </style>
+    <link rel="stylesheet" href="login.css">
 </head>
 
 <body>
@@ -199,11 +53,11 @@
             </div>
 
             <div class="space-y-3">
-                <a href="#" class="social-btn w-full hover:bg-opacity-40">
+                <a href="#" id="googleSignInBtn" class="social-btn w-full hover:bg-opacity-40">
                     <i class="fab fa-google text-red-400 text-xl"></i>
                     <span>Sign in with Google</span>
                 </a>
-                <a href="#" class="social-btn w-full hover:bg-opacity-40">
+                <a href="#" id="facebookSignInBtn" class="social-btn w-full hover:bg-opacity-40">
                     <i class="fab fa-facebook text-blue-500 text-xl"></i>
                     <span>Sign in with Facebook</span>
                 </a>
@@ -267,11 +121,11 @@
             </div>
 
             <div class="space-y-3">
-                <a href="#" class="social-btn w-full hover:bg-opacity-40">
+                <a href="#" id="googleSignUpBtn" class="social-btn w-full hover:bg-opacity-40">
                     <i class="fab fa-google text-red-400 text-xl"></i>
                     <span>Sign up with Google</span>
                 </a>
-                <a href="#" class="social-btn w-full hover:bg-opacity-40">
+                <a href="#" id="facebookSignUpBtn" class="social-btn w-full hover:bg-opacity-40">
                     <i class="fab fa-facebook text-blue-500 text-xl"></i>
                     <span>Sign up with Facebook</span>
                 </a>
@@ -288,7 +142,12 @@
             signInWithEmailAndPassword,
             onAuthStateChanged,
             createUserWithEmailAndPassword,
-            signOut // Import signOut function
+            signOut,
+            // --- NEW IMPORTS FOR SOCIAL LOGIN ---
+            signInWithPopup,
+            GoogleAuthProvider,
+            FacebookAuthProvider
+            // --- END NEW IMPORTS ---
         } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
         // --- Firebase Configuration Placeholder ---
@@ -304,6 +163,12 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+
+        // --- NEW: SOCIAL LOGIN PROVIDER INSTANCES ---
+        const googleProvider = new GoogleAuthProvider();
+        const facebookProvider = new FacebookAuthProvider();
+        // ---------------------------------------------
+
 
         // REVISED: showMessage function to use simple opacity transition
         function showMessage(text, type = 'info') {
@@ -339,6 +204,39 @@
         };
 
 
+        // --- NEW: GENERIC HANDLER FOR SOCIAL SIGN-IN/SIGN-UP ---
+        async function handleSocialSignIn(provider, actionType = 'Login') {
+            // provider.providerId will be "google.com" or "facebook.com"
+            showMessage(`Attempting ${actionType} with ${provider.providerId.replace('.com', '')}...`, 'info');
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                showMessage(`${actionType} successful! Welcome, ${user.displayName || user.email}. Redirecting...`, 'success');
+
+                // Redirect on successful sign-in
+                setTimeout(() => {
+                    window.location.replace('seed.html');
+                }, 1000);
+
+            } catch (error) {
+                console.error(`${provider.providerId} ${actionType} Error:`, error.code, error.message);
+                let errorMessage = `${actionType} failed.`;
+
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = `${actionType} window closed. Please try again.`;
+                } else if (error.code === 'auth/account-exists-with-different-credential') {
+                    errorMessage = "This email is already linked to another sign-in method. Please use the original method.";
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = "Request cancelled. Please try again.";
+                }
+
+                showMessage(errorMessage, 'error');
+            }
+        }
+        // --------------------------------------------------------
+
+
         document.addEventListener('DOMContentLoaded', () => {
             // --- ELEMENT REFERENCES ---
             const loginContainer = document.getElementById('loginForm');
@@ -349,6 +247,14 @@
             const loginForm = document.getElementById('login');
             const loginEmailInput = document.getElementById('loginEmail');
             const loginPasswordInput = document.getElementById('loginPassword');
+
+
+            // --- NEW: SOCIAL BUTTON REFERENCES (Login) ---
+            const googleSignInBtn = document.getElementById('googleSignInBtn');
+            const facebookSignInBtn = document.getElementById('facebookSignInBtn');
+            // --- NEW: SOCIAL BUTTON REFERENCES (Signup) ---
+            const googleSignUpBtn = document.getElementById('googleSignUpBtn');
+            const facebookSignUpBtn = document.getElementById('facebookSignUpBtn');
 
 
             // --- FORM SWITCHING LOGIC (SIMPLE OPACITY TRANSITION) ---
@@ -379,14 +285,9 @@
             // --- END FORM SWITCHING LOGIC ---
 
 
-            // --- FIREBASE LOGIN/AUTH LOGIC (Redirect removed from here) ---
-            // NOTE: The automatic redirection logic is removed from onAuthStateChanged
-            // to prevent redirecting after a successful sign-up.
+            // --- FIREBASE LOGIN/AUTH LOGIC ---
             onAuthStateChanged(auth, (user) => {
-                // if (user) {
-                //     console.log("User already signed in. Redirecting to seed.html.");
-                //     window.location.replace('seed.html');
-                // }
+                // Logic removed to prevent auto-redirect on page load.
             });
 
             if (loginForm) {
@@ -423,6 +324,23 @@
                 });
             }
 
+
+            // --- NEW: SOCIAL LOGIN LISTENERS (Using Login action) ---
+            if (googleSignInBtn) {
+                googleSignInBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleSocialSignIn(googleProvider, 'Login');
+                });
+            }
+            if (facebookSignInBtn) {
+                facebookSignInBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleSocialSignIn(facebookProvider, 'Login');
+                });
+            }
+            // ---------------------------------------------------------
+
+
             // --- SIGNUP FORM SUBMISSION (MODIFIED LOGIC) ---
             const signupFormElement = document.getElementById('signup');
             if (signupFormElement) {
@@ -431,9 +349,14 @@
                     const email = document.getElementById('signupEmail').value;
                     const password = document.getElementById('signupPassword').value;
                     const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                    const termsChecked = document.getElementById('terms').checked; // Check terms
 
                     if (password !== confirmPassword) {
                         showMessage("Passwords do not match.", 'error');
+                        return;
+                    }
+                    if (!termsChecked) { // Check if terms and conditions are accepted
+                        showMessage("Please accept the Terms and Conditions.", 'error');
                         return;
                     }
 
@@ -441,10 +364,9 @@
 
                     try {
                         // Attempt Firebase Signup
-                        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                        await createUserWithEmailAndPassword(auth, email, password);
                         
-                        // FIX: Force sign out the newly created user to prevent 
-                        // the automatic redirect and require them to log in.
+                        // Force sign out the newly created user to prevent auto-redirect
                         await signOut(auth);
                         
                         showMessage("Signup successful! Please log in with your new account.", 'success');
@@ -463,6 +385,21 @@
                     }
                 });
             }
+
+            // --- NEW: SOCIAL SIGNUP LISTENERS (Using Signup action) ---
+            if (googleSignUpBtn) {
+                googleSignUpBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleSocialSignIn(googleProvider, 'Signup'); // Pass 'Signup' action
+                });
+            }
+            if (facebookSignUpBtn) {
+                facebookSignUpBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleSocialSignIn(facebookProvider, 'Signup'); // Pass 'Signup' action
+                });
+            }
+            // ---------------------------------------------------------
         });
     </script>
 
