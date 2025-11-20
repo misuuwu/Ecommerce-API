@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Purchases - DigiSoria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Custom Tailwind Config from your seed.html
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#1F46A9',
+                        'secondary-gray': '#F9FAFB',
+                        'accent-orange': '#FF6B1F',
+                        'text-dark': '#1F2937',
+                        'text-muted': '#6B7280',
+                        'red-danger': '#EF4444',
+                        'light-bg': '#FFFFFF',
+                        'page-bg': '#F3F4F6',
+                        // Custom colors for status indicators
+                        'status-active': '#1F46A9',
+                        'status-to-pay': '#FFC107',
+                        'status-to-ship': '#00BCD4',
+                        'status-to-receive': '#4CAF50',
+                        'status-complete': '#607D8B',
+                        'status-returned': '#F44336',
+                        'status-cancelled': '#9E9E9E',
+                    },
+                    boxShadow: {
+                        'custom-light': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body class="bg-page-bg min-h-screen">
+
+    <div class="container mx-auto p-4 lg:p-8 max-w-7xl">
+        
+        <a href="seed.html" class="inline-flex items-center text-primary-blue hover:text-blue-800 font-semibold mb-4 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> 
+            Back to Home Page
+        </a>
+        <h1 class="text-3xl font-bold text-text-dark mb-6 border-b pb-3">My Purchases</h1>
+
+        <div class="bg-white rounded-xl shadow-custom-light overflow-x-auto mb-6">
+            <div id="status-tabs" class="flex flex-nowrap space-x-2 p-3 lg:justify-between">
+                <button data-status="to pay" class="status-btn text-sm whitespace-nowrap px-4 py-2 font-semibold rounded-lg transition-colors bg-primary-blue text-white">
+                    <i class="fas fa-wallet mr-1"></i> To Pay
+                </button>
+                <button data-status="to ship" class="status-btn text-sm whitespace-nowrap px-4 py-2 font-semibold rounded-lg transition-colors text-text-dark hover:bg-secondary-gray">
+                    <i class="fas fa-box-open mr-1"></i> To Ship
+                </button>
+                <button data-status="to receive" class="status-btn text-sm whitespace-nowrap px-4 py-2 font-semibold rounded-lg transition-colors text-text-dark hover:bg-secondary-gray">
+                    <i class="fas fa-truck mr-1"></i> To Receive
+                </button>
+                <button data-status="complete" class="status-btn text-sm whitespace-nowrap px-4 py-2 font-semibold rounded-lg transition-colors text-text-dark hover:bg-secondary-gray">
+                    <i class="fas fa-check-circle mr-1"></i> Complete
+                </button>
+                <button data-status="refund/returned" class="status-btn text-sm whitespace-nowrap px-4 py-2 font-semibold rounded-lg transition-colors text-text-dark hover:bg-secondary-gray">
+                    <i class="fas fa-undo-alt mr-1"></i> Refund/Returned
+                </button>
+                <button data-status="cancelled" class="status-btn text-sm whitespace-nowrap px-4 py-2 font-semibold rounded-lg transition-colors text-text-dark hover:bg-secondary-gray">
+                    <i class="fas fa-times-circle mr-1"></i> Cancelled
+                </button>
+            </div>
+        </div>
+        <div id="orders-list" class="space-y-4">
+            <p id="loading-message" class="text-center text-text-muted mt-10">Loading your purchases...</p>
+        </div>
+        </div>
+
+    <script type="module">
+
+// Import necessary Firebase functions
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+// !!! IMPORTANT: REPLACE WITH YOUR ACTUAL FIREBASE CONFIG FROM seed.js !!!
+const firebaseConfig = {
+    apiKey: "AIzaSyAqDLocdi1CDHDeD5Z_LOlVZOycI2tuJpk", // <--- USE YOUR KEY
+    authDomain: "digisoria-baa83.firebaseapp.com", // <--- USE YOUR DOMAIN
+    projectId: "digisoria-baa83", // <--- USE YOUR PROJECT ID
+    storageBucket: "digisoria-baa83.appspot.com",
+    messagingSenderId: "1042609120554",
+    appId: "1:1042609120554:web:0500a100e9ae42ead32a",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ordersListContainer = document.getElementById('orders-list');
+const loadingMessage = document.getElementById('loading-message');
+const statusButtons = document.querySelectorAll('.status-btn');
+let currentStatusFilter = 'to pay'; // Default to 'to pay' on load
+
+// Helper function to map order status to display text, icon, and color
+function getStatusDisplay(status) {
+    const statusMap = {
+        'to pay': { text: 'To Pay', icon: 'fas fa-wallet', color: 'bg-status-to-pay' },
+        'to ship': { text: 'To Ship', icon: 'fas fa-box-open', color: 'bg-status-to-ship' },
+        'to receive': { text: 'To Receive', icon: 'fas fa-truck', color: 'bg-status-to-receive' },
+        'complete': { text: 'Complete', icon: 'fas fa-check-circle', color: 'bg-status-complete' },
+        'refund/returned': { text: 'Refund/Returned', icon: 'fas fa-undo-alt', color: 'bg-status-returned' },
+        'cancelled': { text: 'Cancelled', icon: 'fas fa-times-circle', color: 'bg-status-cancelled' },
+    };
+    return statusMap[status] || { text: status, icon: 'fas fa-info-circle', color: 'bg-gray-400' };
+}
+
+// Function to generate the HTML card for an order
+function createOrderCardHTML(order) {
+    const statusInfo = getStatusDisplay(order.status);
+    // Convert Firestore Timestamp to readable date
+    const date = order.timestamp ? new Date(order.timestamp.toDate()).toLocaleDateString() : 'N/A';
+    
+    // Define a robust fallback image URL
+    const FALLBACK_IMAGE_URL = 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
+
+    let firstItem;
+    let finalImageUrl;
+
+    // 1. Safety check for items
+    if (order.items && order.items.length > 0) {
+        firstItem = order.items[0];
+        
+        // 2. Determine the final image URL: use the actual URL if it exists and is not empty, otherwise use fallback
+        if (typeof firstItem.image === 'string' && firstItem.image.trim() !== '') {
+            finalImageUrl = firstItem.image;
+        } else {
+            // If image is missing, empty, or invalid, use the robust placeholder
+            finalImageUrl = FALLBACK_IMAGE_URL;
+        }
+
+    } else {
+        // Fallback for an order with no items listed 
+        firstItem = { 
+            name: order.name || 'No Item Details', 
+            price: order.price || 0, 
+            quantity: order.quantity || 1 
+        };
+        // Check the top-level 'image' field if 'items' array is empty
+        if (typeof order.image === 'string' && order.image.trim() !== '') {
+            finalImageUrl = order.image;
+        } else {
+            finalImageUrl = FALLBACK_IMAGE_URL;
+        }
+    }
+
+    const totalAmount = order.totalAmount || 0; // Use totalAmount saved in DB
+
+    return `
+        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-custom-light border border-gray-200">
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-store text-primary-blue"></i>
+                    <p class="font-semibold text-text-dark">Order ID: #${order.orderId}</p>
+                </div>
+                <span class="text-sm font-bold text-white px-3 py-1 rounded-full ${statusInfo.color}">
+                    <i class="${statusInfo.icon} mr-1"></i> ${statusInfo.text}
+                </span>
+            </div>
+
+            <div class="flex items-start space-x-4 mb-4">
+                <img src="${finalImageUrl}" 
+                     alt="${firstItem.name}" 
+                     class="w-16 h-16 object-cover rounded-md border"
+                     onerror="this.onerror=null; this.src='${FALLBACK_IMAGE_URL}'"
+                >
+                <div>
+                    <p class="text-text-dark font-medium">${firstItem.name}</p>
+                    <p class="text-text-muted text-sm">Qty: ${firstItem.quantity} x ₱${firstItem.price.toFixed(2)}</p>
+                    <p class="text-text-muted text-sm">${(order.items?.length || 0) > 1 ? `+ ${order.items.length - 1} more item(s)` : ''}</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end items-center border-t pt-3">
+                <p class="text-text-dark font-bold text-lg">Total: ₱${totalAmount.toFixed(2)}</p>
+            </div>
+            <div class="flex justify-end space-x-2 mt-3">
+                <span class="text-text-muted text-sm">Order Date: ${date}</span>
+                <button class="px-3 py-1 bg-primary-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-800 transition-colors">
+                    View Details
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Function to fetch orders from Firestore
+function fetchOrders(userId, statusFilter) {
+    loadingMessage.classList.remove('hidden');
+    ordersListContainer.innerHTML = ''; // Clear previous orders
+
+    // Construct the query: Filter by userId, Filter by status, Order by timestamp
+    let q = query(
+        collection(db, "orders"),
+        where("userId", "==", userId),
+        where("status", "==", statusFilter), // Filter for the currently selected status
+        orderBy("timestamp", "desc")
+    );
+
+    // Real-time listener: updates the list instantly if a status changes in the database
+    onSnapshot(q, (snapshot) => {
+        ordersListContainer.innerHTML = ''; // Clear container again for real-time update
+        loadingMessage.classList.add('hidden');
+
+        if (snapshot.empty) {
+            ordersListContainer.innerHTML = `
+                <div class="text-center py-10 bg-white rounded-xl shadow-custom-light">
+                    <i class="fas fa-shopping-bag text-5xl text-text-muted mb-3"></i>
+                    <p class="text-xl font-semibold text-text-dark">No purchases found in the "${getStatusDisplay(statusFilter).text}" section.</p>
+                </div>
+            `;
+            return;
+        }
+
+        snapshot.forEach((doc) => {
+            const order = doc.data();
+            ordersListContainer.innerHTML += createOrderCardHTML(order);
+        });
+    }, (error) => {
+        console.error("Error fetching orders: ", error);
+        ordersListContainer.innerHTML = `<p class="text-red-danger text-center mt-10">Error loading purchases. Please try again.</p>`;
+        loadingMessage.classList.add('hidden');
+    });
+}
+
+// Event listener for status buttons (Tabbing logic)
+statusButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const newStatus = button.getAttribute('data-status');
+        
+        // Update UI for active button
+        statusButtons.forEach(btn => {
+            btn.classList.remove('bg-primary-blue', 'text-white');
+            btn.classList.add('text-text-dark', 'hover:bg-secondary-gray');
+        });
+        button.classList.add('bg-primary-blue', 'text-white');
+        button.classList.remove('text-text-dark', 'hover:bg-secondary-gray');
+
+        // Fetch new data
+        currentStatusFilter = newStatus;
+        if (auth.currentUser) {
+            fetchOrders(auth.currentUser.uid, currentStatusFilter);
+        }
+    });
+});
+
+
+// Initial load: Check auth state and fetch orders
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Fetch the default status ('to pay') orders for the logged-in user
+        fetchOrders(user.uid, currentStatusFilter);
+    } else {
+        ordersListContainer.innerHTML = `<p class="text-red-danger text-center mt-10">You must be logged in to view your purchases.</p>`;
+        loadingMessage.classList.add('hidden');
+    }
+});
+    </script>
+</body>
+
+</html>

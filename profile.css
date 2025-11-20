@@ -1,5 +1,4 @@
 
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
@@ -126,6 +125,15 @@
             color: white;
         }
 
+        /* NEW: Style for the order count */
+        .order-count {
+            color: #ff8c00;
+            /* Orange color for the count */
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-left: 1rem;
+        }
+
         .wishlist-item-card {
             display: flex;
             justify-content: space-between;
@@ -163,6 +171,12 @@
 
         .rating .fas {
             color: #ff8c00;
+        }
+        
+        /* NEW: Empty star style for accurate rating rendering */
+        .rating .far {
+            color: #ff8c00;
+            opacity: 0.3;
         }
 
         .product-price {
@@ -351,4 +365,4 @@
         input:checked+.toggle-slider:before {
             transform: translateX(2rem);
         }
-    
+   

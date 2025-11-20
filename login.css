@@ -12,22 +12,17 @@
         /* REVISED: Clean, centered single-column glass container */
         .auth-container {
             background: rgba(255, 255, 255, 0.15);
-            /* Slightly less opaque white */
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            /* The signature glass border */
             padding: 3rem 2.5rem;
-            /* Balanced padding */
             border-radius: 1.5rem;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
             max-width: 450px;
-            /* Standard width for a single form */
             width: 90%;
             color: white;
             text-align: center;
             position: relative;
-            /* REMOVED: All height transitions from CSS */
         }
 
         /* Forms must now occupy the same space and switch visibility */

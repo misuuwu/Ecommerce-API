@@ -1,3 +1,4 @@
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -1388,8 +1389,8 @@ const fetchProductsByCategory = (category) => {
     // 3. Set up the new listener
     unsubscribeProducts = onSnapshot(productQuery, (querySnapshot) => {
         featuredProductsGrid.innerHTML = '';
-        ALL_PRODUCTS_CACHE = []; 
-        CURRENT_PRODUCTS = []; 
+        ALL_PRODUCTS_CACHE = [];
+        CURRENT_PRODUCTS = [];
 
         if (querySnapshot.empty) {
             featuredProductsGrid.innerHTML =
