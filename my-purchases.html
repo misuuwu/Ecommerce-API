@@ -7,7 +7,6 @@
     <title>My Purchases - DigiSoria</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Custom Tailwind Config from your seed.html
         tailwind.config = {
             theme: {
                 extend: {
@@ -93,7 +92,9 @@ import {
     query,
     where,
     orderBy,
-    onSnapshot
+    limit, // <--- Added limit
+    startAfter, // <--- Added startAfter for pagination
+    getDocs // <--- Changed from onSnapshot to getDocs for one-time fetch
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // !!! IMPORTANT: REPLACE WITH YOUR ACTUAL FIREBASE CONFIG FROM seed.js !!!
@@ -114,7 +115,11 @@ const db = getFirestore(app);
 const ordersListContainer = document.getElementById('orders-list');
 const loadingMessage = document.getElementById('loading-message');
 const statusButtons = document.querySelectorAll('.status-btn');
+
 let currentStatusFilter = 'to pay'; // Default to 'to pay' on load
+let lastVisible = null; // <--- Tracks the last document for pagination
+const PAGE_SIZE = 10; // <--- Define how many items to load per batch
+
 
 // Helper function to map order status to display text, icon, and color
 function getStatusDisplay(status) {
@@ -126,41 +131,33 @@ function getStatusDisplay(status) {
         'refund/returned': { text: 'Refund/Returned', icon: 'fas fa-undo-alt', color: 'bg-status-returned' },
         'cancelled': { text: 'Cancelled', icon: 'fas fa-times-circle', color: 'bg-status-cancelled' },
     };
+    // Note: status-to-pay is FF C1 07 which may be hard to read with white text, 
+    // but preserving your color config.
     return statusMap[status] || { text: status, icon: 'fas fa-info-circle', color: 'bg-gray-400' };
 }
 
-// Function to generate the HTML card for an order
+// Function to generate the HTML card for an order (KEPT AS IS)
 function createOrderCardHTML(order) {
     const statusInfo = getStatusDisplay(order.status);
-    // Convert Firestore Timestamp to readable date
     const date = order.timestamp ? new Date(order.timestamp.toDate()).toLocaleDateString() : 'N/A';
-    
-    // Define a robust fallback image URL
     const FALLBACK_IMAGE_URL = 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image';
 
     let firstItem;
     let finalImageUrl;
 
-    // 1. Safety check for items
     if (order.items && order.items.length > 0) {
         firstItem = order.items[0];
-        
-        // 2. Determine the final image URL: use the actual URL if it exists and is not empty, otherwise use fallback
         if (typeof firstItem.image === 'string' && firstItem.image.trim() !== '') {
             finalImageUrl = firstItem.image;
         } else {
-            // If image is missing, empty, or invalid, use the robust placeholder
             finalImageUrl = FALLBACK_IMAGE_URL;
         }
-
     } else {
-        // Fallback for an order with no items listed 
         firstItem = { 
             name: order.name || 'No Item Details', 
             price: order.price || 0, 
             quantity: order.quantity || 1 
         };
-        // Check the top-level 'image' field if 'items' array is empty
         if (typeof order.image === 'string' && order.image.trim() !== '') {
             finalImageUrl = order.image;
         } else {
@@ -168,7 +165,7 @@ function createOrderCardHTML(order) {
         }
     }
 
-    const totalAmount = order.totalAmount || 0; // Use totalAmount saved in DB
+    const totalAmount = order.totalAmount || 0;
 
     return `
         <div class="bg-white p-4 lg:p-6 rounded-xl shadow-custom-light border border-gray-200">
@@ -200,52 +197,128 @@ function createOrderCardHTML(order) {
             </div>
             <div class="flex justify-end space-x-2 mt-3">
                 <span class="text-text-muted text-sm">Order Date: ${date}</span>
-                <button class="px-3 py-1 bg-primary-blue text-white text-sm font-semibold rounded-lg hover:bg-blue-800 transition-colors">
-                    View Details
-                </button>
             </div>
         </div>
     `;
 }
 
-// Function to fetch orders from Firestore
-function fetchOrders(userId, statusFilter) {
-    loadingMessage.classList.remove('hidden');
-    ordersListContainer.innerHTML = ''; // Clear previous orders
+// Function to create and add the Load More button
+function addLoadMoreButton(userId, statusFilter) {
+    const existingBtn = document.getElementById('load-more-orders-btn');
+    if (existingBtn) {
+        existingBtn.remove();
+    }
+    
+    const buttonHTML = `
+        <button id="load-more-orders-btn" 
+            class="w-full bg-secondary-gray text-text-dark hover:bg-gray-200 font-semibold py-3 rounded-xl transition-colors mt-4 border border-gray-300">
+            <i class="fas fa-redo mr-2"></i> Load More Orders
+        </button>
+    `;
+    ordersListContainer.insertAdjacentHTML('beforeend', buttonHTML);
+    
+    // Add event listener to the new button
+    document.getElementById('load-more-orders-btn').addEventListener('click', () => {
+        // Fetch the next batch (isInitialLoad is false)
+        fetchOrderBatch(userId, statusFilter, false); 
+    });
+}
 
-    // Construct the query: Filter by userId, Filter by status, Order by timestamp
+
+// Function to handle the actual fetching of data (MODIFIED FOR PAGINATION)
+async function fetchOrderBatch(userId, statusFilter, isInitialLoad) {
+    loadingMessage.classList.remove('hidden');
+
+    // Remove any existing Load More button before fetching
+    const loadMoreBtn = document.getElementById('load-more-orders-btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.remove();
+    }
+    
+    // Construct the base query
     let q = query(
         collection(db, "orders"),
         where("userId", "==", userId),
-        where("status", "==", statusFilter), // Filter for the currently selected status
+        where("status", "==", statusFilter),
         orderBy("timestamp", "desc")
     );
 
-    // Real-time listener: updates the list instantly if a status changes in the database
-    onSnapshot(q, (snapshot) => {
-        ordersListContainer.innerHTML = ''; // Clear container again for real-time update
-        loadingMessage.classList.add('hidden');
+    // Add pagination cursor if not the initial load
+    if (lastVisible && !isInitialLoad) {
+        q = query(q, startAfter(lastVisible)); // Start after the last visible document
+    }
 
-        if (snapshot.empty) {
+    // Add the limit
+    q = query(q, limit(PAGE_SIZE)); 
+    
+    try {
+        const snapshot = await getDocs(q); // Use getDocs for one-time fetch
+
+        loadingMessage.classList.add('hidden');
+        
+        // If it's the initial load for a status, clear the container
+        if (isInitialLoad) {
+            ordersListContainer.innerHTML = '';
+        }
+
+        if (snapshot.empty && isInitialLoad) {
             ordersListContainer.innerHTML = `
                 <div class="text-center py-10 bg-white rounded-xl shadow-custom-light">
                     <i class="fas fa-shopping-bag text-5xl text-text-muted mb-3"></i>
                     <p class="text-xl font-semibold text-text-dark">No purchases found in the "${getStatusDisplay(statusFilter).text}" section.</p>
                 </div>
             `;
+            lastVisible = null;
             return;
         }
 
+        // Process documents
         snapshot.forEach((doc) => {
             const order = doc.data();
             ordersListContainer.innerHTML += createOrderCardHTML(order);
         });
-    }, (error) => {
+        
+        // Update the lastVisible document for the next page
+        lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+        // Check if there are potentially more documents to load
+        if (snapshot.docs.length === PAGE_SIZE) {
+            addLoadMoreButton(userId, statusFilter);
+        }
+
+
+    } catch (error) {
         console.error("Error fetching orders: ", error);
         ordersListContainer.innerHTML = `<p class="text-red-danger text-center mt-10">Error loading purchases. Please try again.</p>`;
         loadingMessage.classList.add('hidden');
+    }
+}
+
+
+// Function to reset UI and load first batch for a new status
+function loadNewStatus(userId, newStatus) {
+    currentStatusFilter = newStatus;
+    lastVisible = null; // Reset pagination cursor
+    const loadMoreBtn = document.getElementById('load-more-orders-btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.remove();
+    }
+    fetchOrderBatch(userId, newStatus, true); // True for initial load
+}
+
+// Helper function to set the active button UI
+function setActiveButtonUI(status) {
+    statusButtons.forEach(btn => {
+        if (btn.getAttribute('data-status') === status) {
+            btn.classList.add('bg-primary-blue', 'text-white');
+            btn.classList.remove('text-text-dark', 'hover:bg-secondary-gray');
+        } else {
+            btn.classList.remove('bg-primary-blue', 'text-white');
+            btn.classList.add('text-text-dark', 'hover:bg-secondary-gray');
+        }
     });
 }
+
 
 // Event listener for status buttons (Tabbing logic)
 statusButtons.forEach(button => {
@@ -253,17 +326,11 @@ statusButtons.forEach(button => {
         const newStatus = button.getAttribute('data-status');
         
         // Update UI for active button
-        statusButtons.forEach(btn => {
-            btn.classList.remove('bg-primary-blue', 'text-white');
-            btn.classList.add('text-text-dark', 'hover:bg-secondary-gray');
-        });
-        button.classList.add('bg-primary-blue', 'text-white');
-        button.classList.remove('text-text-dark', 'hover:bg-secondary-gray');
+        setActiveButtonUI(newStatus);
 
-        // Fetch new data
-        currentStatusFilter = newStatus;
+        // Load first page of data for the new status
         if (auth.currentUser) {
-            fetchOrders(auth.currentUser.uid, currentStatusFilter);
+            loadNewStatus(auth.currentUser.uid, newStatus);
         }
     });
 });
@@ -272,13 +339,17 @@ statusButtons.forEach(button => {
 // Initial load: Check auth state and fetch orders
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Fetch the default status ('to pay') orders for the logged-in user
-        fetchOrders(user.uid, currentStatusFilter);
+        // Set the active button UI for the default status ('to pay')
+        setActiveButtonUI(currentStatusFilter); 
+        
+        // Load the first page of default status orders for the logged-in user
+        loadNewStatus(user.uid, currentStatusFilter); 
     } else {
         ordersListContainer.innerHTML = `<p class="text-red-danger text-center mt-10">You must be logged in to view your purchases.</p>`;
         loadingMessage.classList.add('hidden');
     }
 });
+
     </script>
 </body>
 

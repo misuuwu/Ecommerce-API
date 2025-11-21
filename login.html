@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,6 +12,7 @@
 </head>
 
 <body>
+    <div class="stars"></div>
 
     <div id="messageBox" class="message-box"></div>
 
@@ -68,7 +69,7 @@
                     here to reset</a></p>
         </div>
 
-        <div id="signupForm" class="form-container hidden">
+        <div id="signupForm" class="form-container">
             <h1 class="text-4xl font-extrabold mb-3">Sign Up</h1>
             <p class="text-base text-gray-200 mb-8">Join us to explore and share your passions</p>
 
@@ -102,9 +103,9 @@
                 <div class="terms-checkbox-wrapper">
                     <input type="checkbox" id="terms"
                         class="form-checkbox text-orange-600 h-4 w-4 border-gray-300 rounded focus:ring-orange-600">
-                    <label for="terms" class="text-sm text-gray-800 ml-2">I accept the <a
+                    <label for="terms" class="text-sm text-gray-300 ml-2">I accept the <a
                             href="terms_and_conditions.html"
-                            class="text-link underline hover:text-orange-500 transition-colors">Terms and
+                            class="underline text-orange-400 hover:text-orange-300 transition-colors">Terms and
                             Conditions</a></label>
                 </div>
 
@@ -147,7 +148,7 @@
             signInWithPopup,
             GoogleAuthProvider,
             FacebookAuthProvider,
-            sendPasswordResetEmail // NEW IMPORT
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
         // --- Firebase Configuration Placeholder ---
@@ -228,7 +229,6 @@
             }
         }
 
-        // --- NEW: PASSWORD RESET IMPLEMENTATION ---
         async function handlePasswordReset() {
             const email = document.getElementById('loginEmail').value;
 
@@ -251,12 +251,12 @@
                 showMessage(errorMessage, 'error');
             }
         }
-        // ------------------------------------------
 
 
         document.addEventListener('DOMContentLoaded', () => {
             const loginContainer = document.getElementById('loginForm');
             const signupContainer = document.getElementById('signupForm');
+            const authContainer = document.getElementById('authContainer'); // REFERENCE FOR HEIGHT
             const showSignupLink = document.getElementById('showSignup');
             const showLoginLink = document.getElementById('showLogin');
 
@@ -268,15 +268,34 @@
             const facebookSignInBtn = document.getElementById('facebookSignInBtn');
             const googleSignUpBtn = document.getElementById('googleSignUpBtn');
             const facebookSignUpBtn = document.getElementById('facebookSignUpBtn');
-            const forgotPasswordLink = document.getElementById('forgotPasswordLink'); // NEW REFERENCE
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 
-
-            function switchForm(showForm, hideForm) {
-                hideForm.classList.remove('visible');
-                hideForm.classList.add('hidden');
-                showForm.classList.remove('hidden');
-                showForm.classList.add('visible');
+            // 1. DYNAMIC HEIGHT FUNCTION
+            function setContainerHeight(formElement) {
+                // Get the height of the form content
+                const contentHeight = formElement.scrollHeight;
+                // Add the vertical padding of the auth-container (3rem top + 2.5rem bottom = 5.5rem, approx 90px)
+                const totalHeight = contentHeight + 90;
+                authContainer.style.height = `${totalHeight}px`;
             }
+
+
+            // 2. REVISED SWITCH FUNCTION
+            function switchForm(showForm, hideForm) {
+                // Set the container height to the height of the form being shown.
+                setContainerHeight(showForm);
+
+                // Hide the current form (removes 'visible', base CSS handles absolute position and opacity 0)
+                hideForm.classList.remove('visible');
+
+                // Show the new form (adds 'visible', CSS handles opacity 1, relative position, and slide-in)
+                setTimeout(() => {
+                    showForm.classList.add('visible');
+                }, 40); // Small delay ensures height transition starts before opacity changes
+            }
+
+            // 3. Initial call to set the correct height on page load
+            setContainerHeight(loginContainer);
 
             if (showSignupLink) {
                 showSignupLink.addEventListener('click', (e) => {
@@ -345,14 +364,12 @@
                 });
             }
 
-            // --- NEW: FORGOT PASSWORD LISTENER ---
             if (forgotPasswordLink) {
                 forgotPasswordLink.addEventListener('click', (e) => {
                     e.preventDefault();
                     handlePasswordReset();
                 });
             }
-            // -------------------------------------
 
 
             const signupFormElement = document.getElementById('signup');

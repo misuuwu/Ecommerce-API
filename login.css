@@ -1,3 +1,4 @@
+/* login.css */
 
         body {
             font-family: 'Inter', sans-serif;
@@ -7,9 +8,56 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden; 
+            position: relative;
         }
 
-        /* REVISED: Clean, centered single-column glass container */
+        /* --- Optional: Starry Background Animation --- */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0; 
+            animation: move-background 100s linear infinite; 
+        }
+
+        @keyframes move-background {
+            from { background-position: 0 0; }
+            to { background-position: 10000px 5000px; }
+        }
+
+        .stars:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            box-shadow: 
+                0 0 0 1px #fff,
+                -200px -200px #fff,
+                200px 200px #fff,
+                -300px 100px 1px #fff,
+                400px -400px 0 #fff,
+                -100px 500px 1px #fff,
+                200px -100px #fff,
+                -500px -500px 1px #fff;
+            background-size: 500px 500px;
+            animation: star-glow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes star-glow {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        /* ----------------------------------------------- */
+
+
+        /* WIDENED CONTAINER AND GLASSMOPHISM STYLES */
         .auth-container {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(15px);
@@ -18,50 +66,67 @@
             padding: 3rem 2.5rem;
             border-radius: 1.5rem;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            max-width: 450px;
+            max-width: 600px; 
             width: 90%;
             color: white;
             text-align: center;
             position: relative;
+            z-index: 1;
+            /* CRITICAL: Smooth height transition for form switching (0.5s) */
+            transition: height 0.5s ease-in-out, box-shadow 0.3s ease; 
         }
 
         /* Forms must now occupy the same space and switch visibility */
         .form-container {
-            transition: opacity 0.4s ease-in-out;
+            /* Opacity transition is kept at 0.5s for the blur effect */
+            transition: opacity 0.5s ease-in-out; 
             width: 100%;
-            position: relative;
+            position: absolute; /* Stack forms, allows height change to work */
+            top: 0;
+            left: 0;
             padding: 0;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            height: auto;
         }
 
         .form-container.visible {
             opacity: 1;
-            position: relative;
+            position: relative; /* Takes up space and sets the height of the container */
             z-index: 2;
             pointer-events: auto;
+            visibility: visible;
+            /* NEW ANIMATION: Smooth blur fade in effect */
+            animation: blurFadeIn 0.6s ease-out forwards; 
         }
-
-        /* The hidden form must be positioned exactly over the visible one to transition smoothly */
-        .form-container.hidden {
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            pointer-events: none;
+        
+        /* NEW KEYFRAMES: blurFadeIn */
+        @keyframes blurFadeIn {
+            0% {
+                transform: translateY(-10px); /* Small upward motion */
+                filter: blur(5px); /* Start with a heavy blur */
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                filter: blur(0); /* End crystal clear */
+                opacity: 1;
+            }
         }
-
+        
+        /* Input, social button, and message box styles below remain unchanged */
+        
         .input-group {
             position: relative;
             margin-bottom: 1.5rem;
         }
 
-        /* REVISED: Input to match the semi-transparent glass style of the screenshot */
         .input-group input,
         input[type="email"],
         input[type="text"] {
             background: rgba(255, 255, 255, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            /* Semi-transparent border */
             padding: 0.75rem 3rem 0.75rem 1rem;
             border-radius: 0.75rem;
             width: 100%;
@@ -74,9 +139,7 @@
         input[type="email"]:focus,
         input[type="text"]:focus {
             background: rgba(255, 255, 255, 0.35);
-            /* Slightly brighter on focus */
             border-color: white;
-            /* Solid white border on focus */
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
         }
 
@@ -95,7 +158,6 @@
             cursor: pointer;
         }
 
-        /* REVISED: Social Buttons to match the semi-transparent style */
         .social-btn {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -117,7 +179,6 @@
             margin-right: 0.75rem;
         }
 
-        /* Message box cleanup */
         .message-box {
             position: fixed;
             top: 1rem;

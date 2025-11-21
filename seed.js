@@ -1,4 +1,5 @@
 
+
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -884,7 +885,7 @@ const renderTrackOrderScreen = (orderItems) => {
     const totalOrderAmount = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     // Static placeholder data for the order progress bar (you would update this with real order status in a full app)
-    const currentStep = 2; // For demonstration: Order Placed (1) -> Packing Order (2)
+    const currentStep = 2; 
     const steps = [{
         icon: 'fas fa-shopping-cart',
         label: 'Order Placed'
@@ -1063,10 +1064,11 @@ const openOrderReview = async () => {
     const userName = userProfile?.name || 'User Name Placeholder';
     const userAddress = userProfile?.address || 'Address not available in profile.';
     const userPhone = userProfile?.phone || 'Phone not available';
-    // ⭐ END NEW LOGIC ⭐
+    const SHIPPING_SUBTOTAL = 50.00; // Static shipping fee for demonstration
+
 
     updateUserMetric('checkouts');
-    closeCartDrawer(); // Use the existing function to close the drawer correctly
+    closeCartDrawer(); 
 
     let merchandiseSubtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const totalPayment = merchandiseSubtotal + SHIPPING_SUBTOTAL;
@@ -1178,10 +1180,7 @@ const featuredProductsGrid = document.getElementById('featured-products-grid');
 // START MODIFIED CODE for Recommended Products
 const recommendedProductsGrid = document.getElementById('recommended-products-grid');
 
-/**
- * Renders a single RECOMMENDED product card using the FEATURED CARD STYLE.
- * @param {Object} product - The product data object.
- */
+
 function renderRecommendedCard(product) {
     const card = document.createElement('div');
     // MODIFIED CLASS: Now uses the same square card styling as featured products
@@ -1254,9 +1253,7 @@ function renderRecommendedCard(product) {
     recommendedProductsGrid.appendChild(card);
 }
 
-/**
- * Loads a set of products from the cache and renders them to the recommended section.
- */
+
 function loadRecommendedProducts() {
     // Clear the grid first, removing any 'Loading' messages or placeholders
     recommendedProductsGrid.innerHTML = '';
@@ -1267,8 +1264,6 @@ function loadRecommendedProducts() {
         return;
     }
 
-    // FIX APPLIED: Changed slice(2, 8) to slice(0, 6) to ensure we always try to render the first 6
-    // products from the shuffled list, regardless of the list size.
     const recommendedSet = ALL_PRODUCTS_CACHE.slice(0, 10);
 
     recommendedSet.forEach(product => {

@@ -41,7 +41,7 @@
         const authStatusMessage = document.getElementById('auth-status-message'); 
         const activeChatContent = document.getElementById('active-chat-content');
         const selectedUserName = document.getElementById('selected-user-name');
-        const chatHeaderIcon = document.querySelector('#chat-header > div:first-child > div:nth-child(2)'); // Target the avatar div
+        const chatHeaderIcon = document.querySelector('#chat-header > div:first-child > div:nth-child(2)'); 
         const lastSeenStatusElement = document.getElementById('last-seen-status'); 
         const messagesContainer = document.getElementById('messages-container');
         const messageForm = document.getElementById('message-form');

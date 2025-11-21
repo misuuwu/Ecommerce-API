@@ -26,7 +26,7 @@ import {
 
 
 // Firebase global variables provided by the environment
-// NOTE: We rely on the global __app_id, __firebase_config, and __initial_auth_token
+
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 
@@ -212,9 +212,7 @@ function showCustomAlert(title, message, type = 'info') {
 // Attach the alert to the window object so it can be called globally
 window.showCustomAlert = showCustomAlert;
 
-// --- Example function for a product detail page (kept from original snippet structure) ---
-// This part is retained to match the apparent structure of seed.js, 
-// though the logic for adding to cart/buying now is incomplete.
+
 document.addEventListener('DOMContentLoaded', () => {
     const detailAddToCartBtn = document.getElementById('detail-add-to-cart-btn');
     const detailBuyNowBtn = document.getElementById('detail-buy-now-btn');
